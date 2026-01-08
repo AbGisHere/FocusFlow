@@ -1,11 +1,35 @@
+"use client"
+
 import Link from "next/link"
 import { Github, Calendar, CheckCircle, ArrowRight } from "lucide-react"
 import { authClient } from "@/lib/auth-client"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { FrostedHeader } from "@/components/frosted-header"
+import { useEffect, useState } from "react"
+import { version } from "@/lib/version"
 
-export default async function HomePage() {
-  const session = await authClient.getSession()
+export default function HomePage() {
+  const [session, setSession] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function getSession() {
+      try {
+        const sessionData = await authClient.getSession()
+        setSession(sessionData)
+      } catch (error) {
+        console.error("Error getting session:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    getSession()
+  }, [])
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -66,7 +90,7 @@ export default async function HomePage() {
               href="https://github.com/AbGisHere/FocusFlow"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-8 py-3 border border-border text-foreground rounded-lg hover:bg-accent transition-colors text-lg font-medium flex items-center justify-center space-x-2"
+              className="px-8 py-3 border border-border text-foreground rounded-lg hover:bg-primary/20 transition-colors text-lg font-medium flex items-center justify-center space-x-2"
             >
               <Github className="h-5 w-5" />
               <span>View on GitHub</span>
@@ -106,7 +130,7 @@ export default async function HomePage() {
           </div>
 
           <div className="text-center text-sm text-muted-foreground">
-            <p>Version 0.2.0 • Built with Next.js 15, TypeScript, and Tailwind CSS</p>
+            <p>Version {version} • Built with Next.js 15, TypeScript, and Tailwind CSS</p>
           </div>
         </div>
       </main>

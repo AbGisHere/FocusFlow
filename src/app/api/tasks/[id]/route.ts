@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { authClient } from "@/lib/auth-client"
+import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
 export async function PATCH(
@@ -7,9 +7,11 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await authClient.getSession()
+    const session = await auth.api.getSession({
+      headers: request.headers
+    })
     
-    if (!session?.data?.user) {
+    if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -18,7 +20,7 @@ export async function PATCH(
     const task = await prisma.task.update({
       where: {
         id: params.id,
-        userId: session.data.user.id,
+        userId: session.user.id,
       },
       data: {
         status,

@@ -1,16 +1,39 @@
+"use client"
+
 import { Calendar, CheckSquare } from "lucide-react"
 import Link from "next/link"
 import { authClient } from "@/lib/auth-client"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ProfileDropdown } from "@/components/profile-dropdown"
 import { FrostedHeader } from "@/components/frosted-header"
+import { useEffect, useState } from "react"
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const session = await authClient.getSession()
+  const [session, setSession] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function getSession() {
+      try {
+        const sessionData = await authClient.getSession()
+        setSession(sessionData)
+      } catch (error) {
+        console.error("Error getting session:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    getSession()
+  }, [])
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -29,14 +52,14 @@ export default async function DashboardLayout({
                 <div className="hidden md:flex space-x-6">
                   <Link
                     href="/dashboard"
-                    className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
                   >
                     <Calendar className="h-4 w-4" />
                     <span>Dashboard</span>
                   </Link>
                   <Link
                     href="/dashboard/tasks"
-                    className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
                   >
                     <CheckSquare className="h-4 w-4" />
                     <span>Tasks</span>

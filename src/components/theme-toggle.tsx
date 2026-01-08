@@ -29,7 +29,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400 disabled:opacity-50 disabled:pointer-events-none dark:hover:bg-slate-800 dark:hover:text-slate-100 dark:focus:ring-slate-700"
+      className="inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors hover:bg-primary/20 hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:pointer-events-none"
       aria-label="Toggle theme"
     >
       <Sun className={`h-4 w-4 transition-all ${isDark ? '-rotate-90 scale-0' : 'rotate-0 scale-100'}`} />

@@ -12,14 +12,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const tasks = await prisma.task.findMany({
+    const events = await prisma.event.findMany({
       where: { userId: session.user.id },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { startTime: 'asc' },
+      take: 5,
     })
 
-    return NextResponse.json(tasks)
+    return NextResponse.json(events)
   } catch (error) {
-    console.error("Failed to fetch tasks:", error)
+    console.error("Failed to fetch events:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
@@ -34,21 +35,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { title, description, priority, dueDate } = await request.json()
+    const { title, description, startTime, endTime, location } = await request.json()
 
-    const task = await prisma.task.create({
+    const event = await prisma.event.create({
       data: {
         title,
         description,
-        priority: priority || "MEDIUM",
-        dueDate: dueDate ? new Date(dueDate) : null,
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
+        location,
         userId: session.user.id,
       },
     })
 
-    return NextResponse.json(task)
+    return NextResponse.json(event)
   } catch (error) {
-    console.error("Failed to create task:", error)
+    console.error("Failed to create event:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { authClient } from "@/lib/auth-client"
 import { Github, Chrome } from "lucide-react"
+import { version } from "@/lib/version"
 
 export default function SignInPage() {
   const router = useRouter()
@@ -42,7 +43,7 @@ export default function SignInPage() {
             <button
               onClick={handleGoogleSignIn}
               disabled={isLoading}
-              className="w-full flex items-center justify-center space-x-3 px-4 py-3 border border-border rounded-lg hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center space-x-3 px-4 py-3 border border-border rounded-lg hover:bg-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Chrome className="h-5 w-5" />
               <span className="font-medium">
@@ -78,13 +79,13 @@ export default function SignInPage() {
                 href="https://github.com/AbGisHere/FocusFlow"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-1 hover:text-foreground"
+                className="flex items-center space-x-1 hover:text-primary"
               >
                 <Github className="h-4 w-4" />
                 <span>GitHub</span>
               </a>
               <span>•</span>
-              <span>v0.2.0</span>
+              <span>v{version}</span>
             </div>
           </div>
         </div>
