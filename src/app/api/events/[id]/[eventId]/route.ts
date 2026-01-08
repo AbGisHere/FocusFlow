@@ -22,6 +22,9 @@ export async function GET(
         id: id,
         userId: session.user.id 
       },
+      include: {
+        subject: true,
+      },
     })
 
     if (!event) {
@@ -63,6 +66,9 @@ export async function PATCH(
         startTime: new Date(startTime),
         endTime: new Date(endTime),
         location,
+      },
+      include: {
+        subject: true,
       },
     })
 

@@ -23,9 +23,17 @@ interface Event {
   startTime: string
   endTime: string
   location?: string
+  isRecurring?: boolean
+  recurringDays?: string
+  recurringEndDate?: string
   createdAt: string
   updatedAt: string
   userId: string
+  subject?: {
+    id: string
+    name: string
+    color: string
+  }
 }
 
 export default function DashboardPage() {
@@ -299,25 +307,41 @@ export default function DashboardPage() {
             {events.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">No events scheduled</p>
             ) : (
-              events.map((event) => (
-                <div key={event.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                  <div className="flex-1">
-                    <h3 className="font-medium text-foreground">{event.title}</h3>
-                    {event.description && (
-                      <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
-                    )}
-                    <div className="flex items-center space-x-2 mt-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">
-                        {new Date(event.startTime).toLocaleDateString()} at {new Date(event.startTime).toLocaleTimeString()}
-                      </span>
+              events.map((event) => {
+                // Use consistent card styling like other tabs
+                const eventColor = 'bg-card/90 backdrop-blur-sm border-border shadow-sm';
+                
+                return (
+                  <div key={event.id} className={`flex items-center justify-between p-3 rounded-lg border ${eventColor}`}>
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <h3 className="font-medium text-foreground">{event.title}</h3>
+                        {event.isRecurring && (
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        )}
+                      </div>
+                      {event.description && (
+                        <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
+                      )}
+                      <div className="flex items-center space-x-2 mt-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">
+                          {new Date(event.startTime).toLocaleDateString()} at {new Date(event.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </span>
+                      </div>
+                      {event.subject && (
+                        <div className="flex items-center space-x-1 mt-1">
+                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: event.subject.color }}></div>
+                          <span className="text-xs text-muted-foreground">{event.subject.name}</span>
+                        </div>
+                      )}
                     </div>
+                    {event.location && (
+                      <div className="text-sm text-muted-foreground">{event.location}</div>
+                    )}
                   </div>
-                  {event.location && (
-                    <div className="text-sm text-muted-foreground">{event.location}</div>
-                  )}
-                </div>
-              ))
+                )
+              })
             )}
           </div>
         </div>

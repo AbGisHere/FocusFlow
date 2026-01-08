@@ -82,25 +82,28 @@ model Task {
   updatedAt   DateTime  @updatedAt
   userId      String
   subjectId   String?
-  subject     Subject?  @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  subject     Subject?  @relation(fields: [subjectId], references: [id])
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("tasks")
 }
 
 model Event {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  startTime   DateTime
-  endTime     DateTime
-  location    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  userId      String
-  subjectId   String?
-  subject     Subject? @relation(fields: [subjectId], references: [id], onDelete: SetNull)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String    @id @default(cuid())
+  title            String
+  description      String?
+  startTime        DateTime
+  endTime          DateTime
+  location         String?
+  isRecurring      Boolean   @default(false)
+  recurringDays    String?
+  recurringEndDate DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  userId           String
+  subjectId        String?
+  subject          Subject?  @relation(fields: [subjectId], references: [id])
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("events")
 }

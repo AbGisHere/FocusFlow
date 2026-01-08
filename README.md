@@ -1,6 +1,6 @@
 # FocusFlow
 
-![Version](https://img.shields.io/badge/version-0.5.0-green.svg)
+![Version](https://img.shields.io/badge/version-0.6.0-green.svg)
 ![Status](https://img.shields.io/badge/status-under%20development-yellow.svg)
 
 > A modern productivity dashboard to manage tasks and calendar events in one place.
@@ -35,6 +35,35 @@ Currently, users have to **track todos in one app and events in another (or rely
 - [ ] **Reminders & Notifications:** Optional reminders for due tasks and upcoming events
 
 A modern productivity dashboard built with Next.js 15, TypeScript, and Better Auth.
+
+## 🚀 What's New in v0.6.0
+
+### Major Features
+- **🔧 Study-Hour Event Management**: Create and manage study sessions with recurring options
+- **📅 Enhanced Calendar Integration**: Full calendar view with study-hour event support
+- **✏️ Edit Functionality**: Fixed edit buttons for both regular events and study-hour events
+- **🎨 Consistent UI Design**: Upcoming Events now match website's card-based aesthetic
+- **📚 Subject-Based Organization**: Study hours automatically linked to subjects with color coding
+
+### UI/UX Enhancements
+- **Improved Event Styling**: Consistent card-based design across Calendar and Dashboard
+- **Better Visual Hierarchy**: Enhanced readability with proper contrast ratios
+- **Subject Color Indicators**: Visual dots showing subject colors for study-hour events
+- **Recurring Event Indicators**: Clear visual markers for recurring study sessions
+- **Responsive Event Cards**: Better layout and spacing for all device sizes
+
+### Technical Improvements
+- **Enhanced API Endpoints**: New `/api/study-hours` endpoint for study session management
+- **Improved Event Detection**: Better logic to distinguish study-hour vs regular events
+- **Fixed Edit Workflows**: Proper form population and state management for editing
+- **Consistent Styling System**: Unified design language across all components
+- **Better Error Handling**: Improved validation and user feedback
+
+### Bug Fixes
+- **Fixed Edit Button Issues**: Study-hour events now open correct edit forms
+- **Resolved Color Conflicts**: Eliminated blue backgrounds that didn't match theme
+- **Improved Form State**: Better data population when editing existing events
+- **Enhanced Accessibility**: Better contrast and focus states throughout
 
 ## 🚀 What's New in v0.5.0
 
