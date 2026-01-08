@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { Clock, CheckCircle, XCircle, TrendingUp, BookOpen, Target } from 'lucide-react'
+import { Clock, CheckCircle, XCircle, TrendingUp, BookOpen, Target, Trash2 } from 'lucide-react'
+import { useSettings } from "@/contexts/settings-context"
 
 interface SubjectStats {
   subjectId: string
@@ -28,10 +29,37 @@ interface AnalyticsData {
   monthlyTrend: Array<{ month: string; hours: number }>
 }
 
+interface SessionRecord {
+  id: string
+  startTime: string
+  endTime?: string
+  durationMs?: number
+  tasksCompleted: number
+  eventTitle: string
+  subjectName: string
+  studyEfficiency?: number
+  sessionType?: string
+  breakDuration?: number
+  breakAmounts?: number
+  focusScore?: number
+  productivityRating?: number
+}
+
+interface SessionData {
+  sessions: SessionRecord[]
+  subjectId: string
+  subjectName: string
+}
+
 export default function AnalyticsPage() {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'all'>('month')
+  const [expandedSubject, setExpandedSubject] = useState<string | null>(null)
+  const [sessionData, setSessionData] = useState<SessionData | null>(null)
+  const [loadingSessions, setLoadingSessions] = useState(false)
+  const [deletingSession, setDeletingSession] = useState<string | null>(null)
+  const { settings } = useSettings()
 
   useEffect(() => {
     fetchAnalytics()
@@ -55,6 +83,67 @@ export default function AnalyticsPage() {
     }
   }
 
+  const fetchSessionData = async (subjectId: string) => {
+    if (expandedSubject === subjectId) {
+      setExpandedSubject(null)
+      setSessionData(null)
+      return
+    }
+
+    setLoadingSessions(true)
+    setExpandedSubject(subjectId)
+    
+    try {
+      const response = await fetch(`/api/analytics/sessions?subjectId=${subjectId}&range=${timeRange}`, {
+        credentials: 'include'
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setSessionData(data)
+      } else {
+        console.error("Failed to fetch session data:", response.status)
+      }
+    } catch (error) {
+      console.error("Failed to fetch session data:", error)
+    } finally {
+      setLoadingSessions(false)
+    }
+  }
+
+  const deleteSession = async (sessionId: string) => {
+    if (!confirm('Are you sure you want to delete this session? This action cannot be undone.')) {
+      return
+    }
+
+    setDeletingSession(sessionId)
+    
+    try {
+      const response = await fetch(`/api/analytics/sessions/delete?sessionId=${sessionId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      })
+      
+      if (response.ok) {
+        // Remove the deleted session from the local state
+        setSessionData(prev => prev ? {
+          ...prev,
+          sessions: prev.sessions.filter(session => session.id !== sessionId)
+        } : null)
+        
+        // Refresh the main analytics data to update the stats
+        fetchAnalytics()
+      } else {
+        console.error("Failed to delete session:", response.status)
+        alert('Failed to delete session. Please try again.')
+      }
+    } catch (error) {
+      console.error("Failed to delete session:", error)
+      alert('Failed to delete session. Please try again.')
+    } finally {
+      setDeletingSession(null)
+    }
+  }
+
   const formatHours = (hours: number) => {
     const wholeHours = Math.floor(hours)
     const minutes = Math.round((hours - wholeHours) * 60)
@@ -68,6 +157,31 @@ export default function AnalyticsPage() {
     } else {
       return `${wholeHours}hrs ${minutes}mins`
     }
+  }
+
+  const formatDuration = (durationMs?: number) => {
+    if (!durationMs) return 'N/A'
+    const hours = Math.floor(durationMs / (1000 * 60 * 60))
+    const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60))
+    
+    if (hours === 0 && minutes === 0) {
+      return '0mins'
+    } else if (hours === 0) {
+      return `${minutes}mins`
+    } else if (minutes === 0) {
+      return `${hours}hrs`
+    } else {
+      return `${hours}hrs ${minutes}mins`
+    }
+  }
+
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
   }
 
   const getCompletionRate = (completed: number, total: number) => {
@@ -260,13 +374,24 @@ export default function AnalyticsPage() {
                 {analyticsData.subjectStats.map((subject) => (
                   <tr key={subject.subjectId} className="border-b border-border/50">
                     <td className="py-3 px-4">
-                      <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => fetchSessionData(subject.subjectId)}
+                        className="flex items-center space-x-2 hover:text-primary transition-colors"
+                      >
                         <div 
                           className="w-3 h-3 rounded-full" 
                           style={{ backgroundColor: subject.subjectColor }}
                         ></div>
                         <span className="text-sm font-medium text-foreground">{subject.subjectName}</span>
-                      </div>
+                        <svg 
+                          className={`w-4 h-4 transition-transform ${expandedSubject === subject.subjectId ? 'rotate-180' : ''}`}
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
                     </td>
                     <td className="py-3 px-4 text-sm text-foreground">{formatHours(subject.totalHours)}</td>
                     <td className="py-3 px-4 text-sm text-foreground">{subject.sessionCount}</td>
@@ -276,6 +401,152 @@ export default function AnalyticsPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Session Records Dropdown */}
+          {expandedSubject && (
+            <div className="mt-6 border-t border-border pt-6">
+              <h3 className="text-md font-semibold text-foreground mb-4">
+                Session Records - {sessionData?.subjectName}
+              </h3>
+              {loadingSessions ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                </div>
+              ) : sessionData?.sessions && sessionData.sessions.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[800px]">
+                    <thead>
+                      <tr className="border-b border-border">
+                        {settings.showStartTime && (
+                          <th className="text-left py-2 px-3 text-xs font-medium text-muted-foreground">Start Time</th>
+                        )}
+                        {settings.showEndTime && (
+                          <th className="text-left py-2 px-3 text-xs font-medium text-muted-foreground">End Time</th>
+                        )}
+                        {settings.showDuration && (
+                          <th className="text-left py-2 px-3 text-xs font-medium text-muted-foreground">Duration</th>
+                        )}
+                        {settings.showEvent && (
+                          <th className="text-left py-2 px-3 text-xs font-medium text-muted-foreground">Event</th>
+                        )}
+                        {settings.showStudyEfficiency && (
+                          <th className="text-left py-2 px-3 text-xs font-medium text-muted-foreground">Study Efficiency</th>
+                        )}
+                        {settings.showSessionType && (
+                          <th className="text-left py-2 px-3 text-xs font-medium text-muted-foreground">Session Type</th>
+                        )}
+                        {settings.showBreakDuration && (
+                          <th className="text-left py-2 px-3 text-xs font-medium text-muted-foreground">Break Duration</th>
+                        )}
+                        {settings.showBreakAmounts && (
+                          <th className="text-left py-2 px-3 text-xs font-medium text-muted-foreground">Break Amounts</th>
+                        )}
+                        {settings.showFocusScore && (
+                          <th className="text-left py-2 px-3 text-xs font-medium text-muted-foreground">Focus Score</th>
+                        )}
+                        {settings.showProductivityRating && (
+                          <th className="text-left py-2 px-3 text-xs font-medium text-muted-foreground">Productivity Rating</th>
+                        )}
+                        {settings.showTasksCompleted && (
+                          <th className="text-center py-2 px-2 text-xs font-medium text-muted-foreground w-20">Tasks</th>
+                        )}
+                        {settings.showActions && (
+                          <th className="text-center py-2 px-2 text-xs font-medium text-muted-foreground w-16">Actions</th>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sessionData.sessions.map((session) => (
+                        <tr key={session.id} className="border-b border-border/30">
+                          {settings.showStartTime && (
+                            <td className="py-2 px-3 text-xs text-foreground">
+                              {formatDateTime(session.startTime)}
+                            </td>
+                          )}
+                          {settings.showEndTime && (
+                            <td className="py-2 px-3 text-xs text-foreground">
+                              {session.endTime ? formatDateTime(session.endTime) : 'In Progress'}
+                            </td>
+                          )}
+                          {settings.showDuration && (
+                            <td className="py-2 px-3 text-xs text-foreground">
+                              {formatDuration(session.durationMs)}
+                            </td>
+                          )}
+                          {settings.showEvent && (
+                            <td className="py-2 px-3 text-xs text-foreground">
+                              {session.eventTitle}
+                            </td>
+                          )}
+                          {settings.showStudyEfficiency && (
+                            <td className="py-2 px-3 text-xs text-foreground">
+                              {session.studyEfficiency ? `${session.studyEfficiency}%` : 'N/A'}
+                            </td>
+                          )}
+                          {settings.showSessionType && (
+                            <td className="py-2 px-3 text-xs text-foreground">
+                              {session.sessionType || 'Study'}
+                            </td>
+                          )}
+                          {settings.showBreakDuration && (
+                            <td className="py-2 px-3 text-xs text-foreground">
+                              {session.breakDuration ? formatDuration(session.breakDuration) : 'N/A'}
+                            </td>
+                          )}
+                          {settings.showBreakAmounts && (
+                            <td className="py-2 px-3 text-xs text-foreground">
+                              {session.breakAmounts ? session.breakAmounts.toString() : 'N/A'}
+                            </td>
+                          )}
+                          {settings.showFocusScore && (
+                            <td className="py-2 px-3 text-xs text-foreground">
+                              {session.focusScore ? `${session.focusScore}/10` : 'N/A'}
+                            </td>
+                          )}
+                          {settings.showProductivityRating && (
+                            <td className="py-2 px-3 text-xs text-foreground">
+                              {session.productivityRating ? `${session.productivityRating}/5` : 'N/A'}
+                            </td>
+                          )}
+                          {settings.showTasksCompleted && (
+                            <td className="py-2 px-2 text-xs text-foreground text-center">
+                              <span className={`inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-xs font-medium min-w-[20px] ${
+                                session.tasksCompleted > 0 
+                                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                                  : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                              }`}>
+                                {session.tasksCompleted}
+                              </span>
+                            </td>
+                          )}
+                          {settings.showActions && (
+                            <td className="py-2 px-2 text-xs text-foreground text-center">
+                              <button
+                                onClick={() => deleteSession(session.id)}
+                                disabled={deletingSession === session.id}
+                                className="inline-flex items-center justify-center p-1 text-red-600 hover:text-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Delete session"
+                              >
+                                {deletingSession === session.id ? (
+                                  <div className="animate-spin rounded-full h-3 w-3 border border-red-600 border-t-transparent"></div>
+                                ) : (
+                                  <Trash2 className="h-3 w-3" />
+                                )}
+                              </button>
+                            </td>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-sm text-muted-foreground">No session records found for this subject.</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

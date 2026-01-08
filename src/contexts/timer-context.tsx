@@ -36,6 +36,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     startTime: null
   })
   const [isMinimized, setIsMinimized] = useState(false)
+  const [isEnding, setIsEnding] = useState(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Load timer state from localStorage on mount
@@ -69,14 +70,16 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // Save timer state to localStorage whenever it changes
+  // Save timer state to localStorage whenever it changes (but not when ending)
   useEffect(() => {
+    if (isEnding) return // Don't save when ending timer
+    
     try {
       localStorage.setItem('focusflow-timer', JSON.stringify(timer))
     } catch (error) {
       console.error('Error saving timer state to localStorage:', error)
     }
-  }, [timer])
+  }, [timer, isEnding])
 
   // Save minimized state to localStorage whenever it changes
   useEffect(() => {
@@ -144,6 +147,12 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   const endTimer = async () => {
     if (!timer.eventId) return
 
+    // Set ending flag to prevent localStorage saves
+    setIsEnding(true)
+    
+    // Stop the timer first
+    setTimer(prev => ({ ...prev, isRunning: false }))
+
     try {
       const response = await fetch('/api/study-sessions', {
         method: 'POST',
@@ -156,7 +165,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       })
       
       if (response.ok) {
-        // Clear localStorage
+        // Clear localStorage immediately
         try {
           localStorage.removeItem('focusflow-timer')
           localStorage.removeItem('focusflow-timer-minimized')
@@ -166,7 +175,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
         }
         
         // Reset timer state
-        setTimer({
+        const resetTimer = {
           eventId: null,
           eventTitle: '',
           subjectName: '',
@@ -174,14 +183,19 @@ export function TimerProvider({ children }: { children: ReactNode }) {
           isRunning: false,
           elapsedTime: 0,
           startTime: null
-        })
+        }
+        setTimer(resetTimer)
         setIsMinimized(false)
         
-        // Redirect to analytics
-        window.location.href = '/dashboard/analytics'
+        // Redirect to analytics after a short delay
+        setTimeout(() => {
+          window.location.href = '/dashboard/analytics'
+        }, 100)
       }
     } catch (error) {
       console.error("Error saving study session:", error)
+      // Reset ending flag on error
+      setIsEnding(false)
     }
   }
 

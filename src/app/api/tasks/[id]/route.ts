@@ -68,7 +68,8 @@ export async function PATCH(
         status,
         priority,
         dueDate: dueDate ? new Date(dueDate) : undefined,
-        subjectId: subjectId || null,
+        // Only update subjectId if provided, otherwise preserve existing subject
+        ...(subjectId !== undefined && { subjectId }),
       },
       include: {
         subject: true,

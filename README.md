@@ -1,6 +1,6 @@
 # FocusFlow
 
-![Version](https://img.shields.io/badge/version-0.9.0-green.svg)
+![Version](https://img.shields.io/badge/version-0.10.0-green.svg)
 ![Status](https://img.shields.io/badge/status-under%20development-yellow.svg)
 
 > A modern productivity dashboard to manage tasks and calendar events in one place.
@@ -38,181 +38,109 @@ Currently, users have to **track todos in one app and events in another (or rely
 - [x] **Global Timer with Minimized State**: Continue timing while using other app features
 - [x] **Timer Persistence**: Timer state survives page refreshes and browser sessions
 - [x] **Draggable Timer**: Position and save minimized timer anywhere on screen
-- [ ] **Reminders & Notifications:** Optional reminders for due tasks and upcoming events
+- [x] **Session Records Export**: Download data as CSV or PDF with customizable date ranges
+- [x] **Customizable Analytics Table**: Toggle column visibility for personalized data view
+- [x] **Auto-Save Settings**: All preferences automatically saved and persisted
+- [x] **Reminders & Notifications:** Optional reminders for due tasks and upcoming events
 
 A modern productivity dashboard built with Next.js 15, TypeScript, and Better Auth.
 
-## 🚀 What's New in v0.9.0
+## 🚀 What's New in v0.10.0
 
 ### 🎯 Major Features
-- **💾 Timer Persistence**: Timer state now survives page refreshes
-  - Running timers continue counting after page refresh
-  - Minimized timers stay minimized across browser sessions
-  - Accurate elapsed time calculation when restoring timers
-  - Automatic cleanup when timer sessions end
-  - LocalStorage-based persistence for reliable state management
-- **🎯 Draggable Minimized Timer**: Full drag-and-drop functionality
-  - Click and drag timer anywhere on the screen
-  - Position persists across page refreshes and browser sessions
-  - Smart corner snapping when dragged near edges (50px threshold)
-  - Smooth animations and visual feedback during dragging
-  - Prevents text selection during drag operations
-  - Constrained to viewport boundaries for optimal visibility
+- **📊 Session Records Export System**: Complete data export functionality with multiple formats
+  - **CSV Export**: Download study session data as comma-separated values for spreadsheet analysis
+  - **PDF Export**: Generate formatted PDF reports with professional layout
+  - **Date Range Selection**: Export data for Last Week, Last Month, or All Time
+  - **Complete Column Support**: All 13 columns included in exports (Start Time, End Time, Duration, Event, Subject, Tasks Completed, Actions, Study Efficiency, Session Type, Break Duration, Break Amounts, Focus Score, Productivity Rating)
+  - **Smart Data Processing**: Automatic task completion counting and duration calculations
+  - **Professional File Naming**: Format `focusflow-sessions-{range}-{date}.csv/pdf`
+- **⚙️ Enhanced Settings Panel**: Comprehensive session records customization
+  - **Column Visibility Controls**: Toggle any of the 13 columns on/off in analytics table
+  - **Auto-Save Settings**: All preferences automatically saved to localStorage
+  - **Settings Persistence**: Column preferences survive page refreshes and browser sessions
+  - **Clean UI Design**: Modern toggle switches with descriptive labels
+  - **Organized Categories**: Display Options and Data Management sections
+- **📋 Analytics Table Improvements**: Enhanced session records display
+  - **Conditional Column Rendering**: Only show columns enabled in settings
+  - **Rightmost Action Columns**: Tasks and Actions always positioned as last columns
+  - **Horizontal Scrolling**: Smooth scroll when table width exceeds container
+  - **Responsive Layout**: Minimum width ensures proper table display
+  - **Smart Data Display**: Shows actual values or "N/A" for missing data
+- **🎨 Themed Export Controls**: Consistent visual design throughout
+  - **Primary Button Styling**: Export buttons match website's primary theme
+  - **Loading States**: Visual feedback during export processing
+  - **Error Handling**: User-friendly error messages for failed exports
+  - **Disabled States**: Prevent multiple simultaneous exports
+- **📅 Enhanced Timer Page Layout**: Dynamic responsive layout with conditional calendar and tasks display
+  - **Adaptive Grid System**: Timer occupies left half, calendar and tasks stack vertically on right
+  - **Settings-Based Visibility**: Toggle calendar and tasks independently via settings panel
+  - **Flexible Layouts**: Full-width timer when sidebars hidden, split-view when both visible
+  - **Responsive Design**: Optimized for desktop, tablet, and mobile experiences
+- **🗓️ Mini Calendar Integration**: Full calendar functionality within timer page
+  - **Month Navigation**: Previous/next month controls with smooth transitions
+  - **Day Selection**: Click any day to view events and tasks for that date
+  - **Event Display**: Subject-colored events with recurring indicators and time display
+  - **Task Integration**: Shows both TODO and IN_PROGRESS tasks with colored dots
+  - **Visual Indicators**: Blue dots for ongoing tasks, orange dots for pending tasks
+  - **Smart Filtering**: Tasks without due dates appear in today's view
+  - **Aesthetic Grid**: Compact, properly proportioned calendar with clean design
+- **⚡ Interactive Task Management**: Real-time status updates from timer page
+  - **Dropdown Controls**: Beautiful status dropdowns with color-coded themes
+  - **Subject Preservation**: Tasks maintain subject associations when updated from timer
+  - **Instant Updates**: Optimistic UI updates without page refresh delays
+  - **Cross-Section Sync**: Status changes reflect in both related tasks and calendar items
+  - **API Optimization**: Separate data fetching for active vs. all tasks including completed
+  - **Error Handling**: Robust error handling with fallback states
+- **🎨 Enhanced Visual Design**: Modern, aesthetic interface matching website style
+  - **Color-Coded Status**: Orange for TODO, blue for IN_PROGRESS, green for DONE
+  - **Custom Dropdowns**: Styled selects with hover states and custom chevron arrows
+  - **Smooth Transitions**: 200ms duration animations for all interactive elements
+  - **Consistent Theming**: Matches app's green accent color throughout
+  - **Proper Spacing**: Optimized padding and margins for clean layout
+  - **Typography**: Improved font weights and sizing for better readability
 - **📋 Drag and Drop Task Management**: Interactive Kanban board functionality
   - Drag tasks between columns to automatically update status
   - Optimistic updates for instant UI response
   - Smooth animations matching timer drag behavior
   - Visual feedback with hover states and drop zones
-  - Automatic backend sync with rollback on failure
-  - No text selection interference during drag operations
+
+### 📄 Export Features
+- **CSV Format**: 
+  - Properly formatted with quoted values
+  - Compatible with Excel, Google Sheets, and data analysis tools
+  - Includes all session metadata and calculated metrics
+- **PDF Format**:
+  - Landscape orientation for optimal column display
+  - Professional layout with title and date range
+  - Summary statistics (total sessions, study hours)
+  - Paginated table with headers on each page
+  - Compact font sizing for maximum data visibility
+  - Up to 30 sessions per page with overflow indication
 
 ### 🛠 Technical Improvements
+- **New API Endpoints**: `/api/export/csv` and `/api/export/pdf`
+- **Enhanced Data Fetching**: Optimized queries with proper relationships
+- **Type Safety**: Extended interfaces for all export data fields
+- **Performance**: Efficient data processing and file generation
+- **Dependencies**: Added jsPDF and html2canvas for PDF generation
+- **Error Recovery**: Robust error handling with user feedback
+- **File Management**: Automatic file download with proper MIME types
 - **Enhanced State Management**: Timer context now uses localStorage for persistence
 - **Better Time Accuracy**: Improved elapsed time calculations across page refreshes
 - **Clean State Cleanup**: Proper localStorage cleanup when timer sessions end
 - **Drag System**: Custom drag implementation with mouse event handling
 - **Optimistic Updates**: Instant UI updates with background API synchronization
-- **Error Handling**: Robust error handling for localStorage and API operations
 - **Cross-browser Compatibility**: Webkit prefixes and fallbacks for Safari
 
-## 🚀 What's New in v0.8.0
-
-### 🎯 Major Features
-- **⏱️ Global Timer with Minimized State**: Seamless timer experience across the app
-  - Continue timing while browsing other parts of the app
-  - Minimized timer appears in the bottom-right corner
-  - Preserves timer state when navigating between pages
-  - Quick access to pause/resume and end session controls
-  - Matches app's frosted glass design language
-
-### 🛠 Improvements
-- **Consistent UI Styling**: Unified frosted glass appearance across all components
-- **Enhanced Navigation**: Smoother transitions when moving between timer and other pages
-- **Better State Management**: Timer state persists correctly during navigation
-- **Improved Mobile Experience**: Optimized timer controls for touch devices
-
-## 🚀 What's New in v0.7.0
-
-### 🎯 Major Features
-- **📊 Analytics Dashboard**: Complete analytics tab with study session insights and progress tracking
-  - Study hours by subject with visual charts
-  - Task completion statistics and status distribution
-  - Weekly and monthly progress trends
-  - Subject-wise session details and average durations
-- **⏱️ Interactive Study Timer**: Built-in timer for tracking study session duration
-  - Real-time countdown display with hours:minutes:seconds format
-  - Pause/Resume functionality during study sessions
-  - Automatic session saving when timer ends
-  - Seamless integration with calendar events
-- **💾 Session Persistence**: Study sessions automatically saved to database
-  - Duration tracking in milliseconds for precise analytics
-  - Linked to calendar events for complete study history
-  - Real-time updates across the application
-
-### 🔧 Bug Fixes
-- **Fixed Study Session API**: Resolved 500 error when saving study sessions
-- **Database Schema**: Added StudySession table for proper session tracking
-- **Timer Accuracy**: Improved precision for session duration calculations
+### 🎯 User Experience
+- **Seamless Integration**: Export controls directly in settings panel
+- **Instant Feedback**: Loading spinners and status updates
+- **Data Privacy**: All processing done client-side with secure API calls
+- **Cross-Platform**: Works on desktop, tablet, and mobile devices
+- **Accessibility**: Proper ARIA labels and keyboard navigation
 
 ---
-
-## 🚀 What's New in v0.6.0
-
-### Major Features
-- **🔧 Study-Hour Event Management**: Create and manage study sessions with recurring options
-- **📅 Enhanced Calendar Integration**: Full calendar view with study-hour event support
-- **✏️ Edit Functionality**: Fixed edit buttons for both regular events and study-hour events
-- **🎨 Consistent UI Design**: Upcoming Events now match website's card-based aesthetic
-- **📚 Subject-Based Organization**: Study hours automatically linked to subjects with color coding
-
-### UI/UX Enhancements
-- **Improved Event Styling**: Consistent card-based design across Calendar and Dashboard
-- **Better Visual Hierarchy**: Enhanced readability with proper contrast ratios
-- **Subject Color Indicators**: Visual dots showing subject colors for study-hour events
-- **Recurring Event Indicators**: Clear visual markers for recurring study sessions
-- **Responsive Event Cards**: Better layout and spacing for all device sizes
-
-### Technical Improvements
-- **Enhanced API Endpoints**: New `/api/study-hours` endpoint for study session management
-- **Improved Event Detection**: Better logic to distinguish study-hour vs regular events
-- **Fixed Edit Workflows**: Proper form population and state management for editing
-- **Consistent Styling System**: Unified design language across all components
-- **Better Error Handling**: Improved validation and user feedback
-
-### Bug Fixes
-- **Fixed Edit Button Issues**: Study-hour events now open correct edit forms
-- **Resolved Color Conflicts**: Eliminated blue backgrounds that didn't match theme
-- **Improved Form State**: Better data population when editing existing events
-- **Enhanced Accessibility**: Better contrast and focus states throughout
-
-## 🚀 What's New in v0.5.0
-
-### Major Features
-- **📚 Subject Management System**: Create and organize subjects with custom colors
-- **🔍 Expandable Subject Views**: Click any subject to see all related tasks and events
-- **⚡ In-line Task Status Updates**: Change task status directly from subject view with dropdown menus
-- **🎨 Glassmorphism Design**: Modern frosted glass effects throughout the UI
-- **📋 Enhanced Task Display**: Shows due dates, priority badges, and status indicators
-- **📅 Event Integration**: View all events related to specific subjects
-
-### UI/UX Enhancements
-- **Frosted Glass Effects**: Beautiful backdrop blur effects on headers and content containers
-- **Improved Dropdown Menus**: Fixed visibility issues with portal-based dropdowns
-- **Better Visual Hierarchy**: Clear separation between containers and content items
-- **Enhanced Color Coding**: Consistent status indicators and priority badges
-- **Smooth Animations**: Improved transitions and hover effects throughout
-
-### Subject Tab Features
-- **Expandable Cards**: Click subjects to reveal related tasks and events
-- **Real-time Status Updates**: Change task status without leaving the subject view
-- **Due Date Display**: See task due dates directly in the expanded view
-- **Priority Badges**: Visual priority indicators (High/Medium/Low)
-- **Event Integration**: View all events associated with each subject
-- **Smart Caching**: Efficient data loading with caching for better performance
-
-### Technical Improvements
-- **Portal-based Dropdowns**: Fixed dropdown visibility issues across all containers
-- **Enhanced State Management**: Improved caching and data flow
-- **Better Error Handling**: More robust API error management
-- **Performance Optimizations**: Reduced unnecessary re-renders and API calls
-- **Type Safety**: Enhanced TypeScript interfaces for better development experience
-
-## 🚀 What's New in v0.4.0
-
-### Major Improvements
-- **🎨 Enhanced UI Components**: Refined form inputs and buttons with consistent green theme
-- **🔒 Improved Authentication Flow**: Better session management and error handling
-- **📅 Calendar Integration**: Seamless event management with the task system
-- **🌓 Theme Refinements**: Better contrast and accessibility in both light and dark modes
-- **✨ UI Polish**: Consistent styling across all interactive elements
-- **� Responsive Improvements**: Better mobile experience for forms and dropdowns
-
-### UI/UX Enhancements
-- **Form Inputs**: Consistent styling for all form elements with green focus states
-- **Dropdown Menus**: Improved frosted glass effect matching the header
-- **Button States**: Hover and active states refined for better feedback
-- **Accessibility**: Improved contrast ratios and focus indicators
-- **Loading States**: Smoother transitions and better visual feedback
-
-### Technical Improvements
-- **Code Quality**: Improved component organization and reusability
-- **Performance**: Optimized re-renders and state management
-- **Dependencies**: Updated to latest stable versions
-- **Type Safety**: Enhanced TypeScript types and interfaces
-
-### UI/UX Enhancements
-- **Green Hover Effects**: All interactive elements use brand-consistent green colors
-- **Task Cards**: Redesigned with inline priority badges and better layout
-- **Profile Dropdown**: Theme-aware styling with green hover states
-- **Navigation**: Improved hover states and visual feedback
-- **Loading States**: Better error handling and loading indicators
-
-### Technical Improvements
-- **Authentication**: Fixed server-side session validation
-- **API Optimization**: Proper credential handling for all API calls
-- **Theme System**: Resolved SSR hydration issues
-- **Version Management**: Centralized version system from package.json
-- **Code Quality**: Better error handling and logging
 
 ## 🛠️ Tech Stack
 
@@ -224,6 +152,9 @@ A modern productivity dashboard built with Next.js 15, TypeScript, and Better Au
 - **Authentication**: Better Auth with Google OAuth
 - **Icons**: Lucide React
 - **State Management**: React Hooks with proper SSR handling
+- **PDF Generation**: jsPDF
+- **Canvas Rendering**: html2canvas
+- **Export Processing**: Client-side file generation with API integration
 
 ## 🌟 Features
 
@@ -246,6 +177,14 @@ A modern productivity dashboard built with Next.js 15, TypeScript, and Better Au
 - 📱 **Mobile First**: Responsive design for all screen sizes
 - ⚡ **Fast Performance**: Optimized loading and interactions
 - 🛡️ **Secure**: Google OAuth with proper session management
+
+### Data Export & Analytics
+- 📊 **CSV Export**: Download session data for spreadsheet analysis
+- 📄 **PDF Export**: Generate professional reports with landscape layout
+- 📅 **Date Range Selection**: Export Last Week, Last Month, or All Time
+- 📋 **Customizable Tables**: Toggle column visibility in analytics view
+- 💾 **Auto-Save Settings**: Preferences automatically saved to localStorage
+- 📈 **Complete Analytics**: Study hours, task completion, and progress tracking
 
 ## 🚀 Getting Started
 

@@ -3,6 +3,7 @@
 import { User, LogOut, Settings } from "lucide-react"
 import { authClient } from "@/lib/auth-client"
 import { useState, useRef, useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 interface ProfileDropdownProps {
   user: {
@@ -15,6 +16,7 @@ interface ProfileDropdownProps {
 export function ProfileDropdown({ user }: ProfileDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -30,6 +32,11 @@ export function ProfileDropdown({ user }: ProfileDropdownProps) {
   const handleSignOut = async () => {
     await authClient.signOut()
     window.location.href = "/"
+  }
+
+  const handleSettings = () => {
+    setIsOpen(false)
+    router.push("/dashboard/settings")
   }
 
   return (
@@ -65,7 +72,10 @@ export function ProfileDropdown({ user }: ProfileDropdownProps) {
             </p>
           </div>
           
-          <button className="w-full px-4 py-2 text-sm text-left text-foreground hover:bg-primary/20 flex items-center space-x-2">
+          <button 
+            onClick={handleSettings}
+            className="w-full px-4 py-2 text-sm text-left text-foreground hover:bg-primary/20 flex items-center space-x-2"
+          >
             <Settings className="h-4 w-4" />
             <span>Settings</span>
           </button>

@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/contexts/theme-context"
 import { TimerProvider } from "@/contexts/timer-context"
+import { SettingsProvider } from "@/contexts/settings-context"
 import { MinimizedTimer } from "@/components/minimized-timer"
 import "./globals.css"
 
@@ -21,10 +22,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider defaultTheme="system">
-          <TimerProvider>
-            {children}
-            <MinimizedTimer />
-          </TimerProvider>
+          <SettingsProvider>
+            <TimerProvider>
+              {children}
+              <MinimizedTimer />
+            </TimerProvider>
+          </SettingsProvider>
         </ThemeProvider>
       </body>
     </html>

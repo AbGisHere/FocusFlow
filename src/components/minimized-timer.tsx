@@ -1,6 +1,7 @@
 "use client"
 
 import { useTimer } from '@/contexts/timer-context'
+import { useSettings } from '@/contexts/settings-context'
 import { Play, Pause, Square, X, Maximize2 } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
@@ -12,6 +13,7 @@ interface Position {
 
 export function MinimizedTimer() {
   const { timer, pauseTimer, resumeTimer, endTimer, restoreTimer, isMinimized } = useTimer()
+  const { settings } = useSettings()
   const pathname = usePathname()
   const router = useRouter()
   
@@ -92,6 +94,9 @@ export function MinimizedTimer() {
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) return // Ignore button clicks
+    
+    // Check if movable timer is enabled in settings
+    if (!settings.movableMinimizedTimer) return
     
     e.preventDefault() // Prevent default text selection behavior
     
@@ -178,7 +183,8 @@ export function MinimizedTimer() {
     <div
       ref={timerRef}
       className={`fixed bg-card/90 backdrop-blur-sm rounded-lg border border-border shadow-lg p-3 z-50 min-w-[280px] transition-shadow ${
-        isDragging ? 'cursor-grabbing shadow-2xl scale-105' : 'cursor-grab hover:shadow-xl'
+        isDragging ? 'cursor-grabbing shadow-2xl scale-105' : 
+        settings.movableMinimizedTimer ? 'cursor-grab hover:shadow-xl' : 'cursor-default hover:shadow-xl'
       } select-none`}
       style={{
         left: `${position.x}px`,
@@ -200,14 +206,20 @@ export function MinimizedTimer() {
         </div>
         <div className="flex items-center space-x-1">
           <button
-            onClick={handleRestore}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleRestore()
+            }}
             className="p-1 text-muted-foreground hover:text-foreground transition-colors"
             title="Restore Timer"
           >
             <Maximize2 className="h-4 w-4" />
           </button>
           <button
-            onClick={endTimer}
+            onClick={(e) => {
+              e.stopPropagation()
+              endTimer()
+            }}
             className="p-1 text-red-500 hover:text-red-600 transition-colors"
             title="End Session"
           >
@@ -224,7 +236,10 @@ export function MinimizedTimer() {
         <div className="flex items-center space-x-1">
           {timer.isRunning ? (
             <button
-              onClick={pauseTimer}
+              onClick={(e) => {
+                e.stopPropagation()
+                pauseTimer()
+              }}
               className="p-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
               title="Pause"
             >
@@ -232,7 +247,10 @@ export function MinimizedTimer() {
             </button>
           ) : (
             <button
-              onClick={resumeTimer}
+              onClick={(e) => {
+                e.stopPropagation()
+                resumeTimer()
+              }}
               className="p-2 bg-primary text-white rounded hover:bg-primary/90 transition-colors"
               title="Resume"
             >

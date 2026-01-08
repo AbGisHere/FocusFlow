@@ -363,13 +363,13 @@ export default function TasksPage() {
         </div>
         <div className="relative">
           <button
-            onClick={() => setOpenDropdown(openDropdown === task.id ? null : task.id)}
-            className={`p-1 text-muted-foreground hover:text-foreground transition-colors ${
-              openDropdown === task.id ? 'pointer-events-auto' : 'pointer-events-none'
-            }`}
-            style={{ pointerEvents: openDropdown === task.id ? 'auto' : 'none' }}
+            onClick={(e) => {
+              e.stopPropagation()
+              setOpenDropdown(openDropdown === task.id ? null : task.id)
+            }}
+            className="p-2 text-muted-foreground hover:text-foreground hover:bg-primary/10 rounded-md transition-all duration-200 cursor-pointer"
           >
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className="h-5 w-5" />
           </button>
           
           {openDropdown === task.id && (
