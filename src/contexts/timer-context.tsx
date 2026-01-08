@@ -38,6 +38,55 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   const [isMinimized, setIsMinimized] = useState(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
+  // Load timer state from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedTimer = localStorage.getItem('focusflow-timer')
+      const savedMinimized = localStorage.getItem('focusflow-timer-minimized')
+      
+      if (savedTimer) {
+        const parsedTimer = JSON.parse(savedTimer)
+        // Convert startTime back to Date object if it exists
+        if (parsedTimer.startTime) {
+          parsedTimer.startTime = new Date(parsedTimer.startTime)
+          
+          // If timer was running, adjust startTime to account for time elapsed since page refresh
+          if (parsedTimer.isRunning) {
+            const now = Date.now()
+            const savedElapsed = parsedTimer.elapsedTime
+            // Calculate new startTime that would give us the correct elapsed time
+            parsedTimer.startTime = new Date(now - savedElapsed)
+          }
+        }
+        setTimer(parsedTimer)
+      }
+      
+      if (savedMinimized) {
+        setIsMinimized(JSON.parse(savedMinimized))
+      }
+    } catch (error) {
+      console.error('Error loading timer state from localStorage:', error)
+    }
+  }, [])
+
+  // Save timer state to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('focusflow-timer', JSON.stringify(timer))
+    } catch (error) {
+      console.error('Error saving timer state to localStorage:', error)
+    }
+  }, [timer])
+
+  // Save minimized state to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('focusflow-timer-minimized', JSON.stringify(isMinimized))
+    } catch (error) {
+      console.error('Error saving minimized state to localStorage:', error)
+    }
+  }, [isMinimized])
+
   useEffect(() => {
     if (timer.isRunning && timer.startTime) {
       intervalRef.current = setInterval(() => {
@@ -107,6 +156,15 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       })
       
       if (response.ok) {
+        // Clear localStorage
+        try {
+          localStorage.removeItem('focusflow-timer')
+          localStorage.removeItem('focusflow-timer-minimized')
+          localStorage.removeItem('focusflow-timer-position')
+        } catch (error) {
+          console.error('Error clearing timer state from localStorage:', error)
+        }
+        
         // Reset timer state
         setTimer({
           eventId: null,

@@ -3,11 +3,154 @@
 import { useTimer } from '@/contexts/timer-context'
 import { Play, Pause, Square, X, Maximize2 } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
+import { useState, useEffect, useRef } from 'react'
+
+interface Position {
+  x: number
+  y: number
+}
 
 export function MinimizedTimer() {
   const { timer, pauseTimer, resumeTimer, endTimer, restoreTimer, isMinimized } = useTimer()
   const pathname = usePathname()
   const router = useRouter()
+  
+  const [position, setPosition] = useState<Position>({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const timerRef = useRef<HTMLDivElement>(null)
+  const isInitialized = useRef(false)
+
+  // Load position from localStorage on mount
+  useEffect(() => {
+    if (!isInitialized.current) {
+      try {
+        const savedPosition = localStorage.getItem('focusflow-timer-position')
+        if (savedPosition) {
+          const parsed = JSON.parse(savedPosition)
+          setPosition(parsed)
+        } else {
+          // Default position (bottom-right)
+          setPosition({ x: window.innerWidth - 320, y: window.innerHeight - 150 })
+        }
+      } catch (error) {
+        console.error('Error loading timer position:', error)
+        setPosition({ x: window.innerWidth - 320, y: window.innerHeight - 150 })
+      }
+      isInitialized.current = true
+    }
+  }, [])
+
+  // Save position to localStorage whenever it changes
+  useEffect(() => {
+    if (isInitialized.current) {
+      try {
+        localStorage.setItem('focusflow-timer-position', JSON.stringify(position))
+      } catch (error) {
+        console.error('Error saving timer position:', error)
+      }
+    }
+  }, [position])
+
+  // Auto-align to corners only when dragged near corners
+  const snapToCorner = (x: number, y: number): Position => {
+    const screenWidth = window.innerWidth
+    const screenHeight = window.innerHeight
+    const timerWidth = 280 // min-w-[280px] + padding
+    const timerHeight = 120 // approximate height
+    const margin = 16 // distance from edges
+    const snapThreshold = 50 // Distance from corner to trigger snap
+    
+    // Determine if timer is near any corner
+    const nearLeftCorner = x < snapThreshold
+    const nearRightCorner = x > screenWidth - timerWidth - snapThreshold
+    const nearTopCorner = y < snapThreshold
+    const nearBottomCorner = y > screenHeight - timerHeight - snapThreshold
+    
+    let snappedX = x
+    let snappedY = y
+    
+    // Only snap if dragged near a corner
+    if (nearLeftCorner || nearRightCorner || nearTopCorner || nearBottomCorner) {
+      // Snap horizontally
+      if (nearLeftCorner) {
+        snappedX = margin // Left side
+      } else if (nearRightCorner) {
+        snappedX = screenWidth - timerWidth - margin // Right side
+      }
+      
+      // Snap vertically
+      if (nearTopCorner) {
+        snappedY = margin // Top
+      } else if (nearBottomCorner) {
+        snappedY = screenHeight - timerHeight - margin // Bottom
+      }
+    }
+    
+    return { x: snappedX, y: snappedY }
+  }
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return // Ignore button clicks
+    
+    e.preventDefault() // Prevent default text selection behavior
+    
+    setIsDragging(true)
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    })
+    
+    // Change cursor for the whole document
+    document.body.style.cursor = 'grabbing'
+    document.body.style.userSelect = 'none'
+    document.body.style.webkitUserSelect = 'none' // For Safari
+  }
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return
+      
+      const newX = e.clientX - dragStart.x
+      const newY = e.clientY - dragStart.y
+      
+      // Keep timer within viewport bounds
+      const maxX = window.innerWidth - 280 // timer width
+      const maxY = window.innerHeight - 120 // timer height
+      const constrainedX = Math.max(0, Math.min(newX, maxX))
+      const constrainedY = Math.max(0, Math.min(newY, maxY))
+      
+      setPosition({ x: constrainedX, y: constrainedY })
+    }
+
+    const handleMouseUp = () => {
+      if (isDragging) {
+        setIsDragging(false)
+        // Restore document styles
+        document.body.style.cursor = ''
+        document.body.style.userSelect = ''
+        document.body.style.webkitUserSelect = ''
+        
+        // Snap to corner
+        const snappedPosition = snapToCorner(position.x, position.y)
+        setPosition(snappedPosition)
+      }
+    }
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      // Restore document styles in case of cleanup
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      document.body.style.webkitUserSelect = ''
+    }
+  }, [isDragging, dragStart, position])
 
   // Don't show minimized timer if:
   // 1. No timer is running
@@ -32,7 +175,18 @@ export function MinimizedTimer() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 bg-card/90 backdrop-blur-sm rounded-lg border border-border shadow-lg p-3 z-50 min-w-[280px]">
+    <div
+      ref={timerRef}
+      className={`fixed bg-card/90 backdrop-blur-sm rounded-lg border border-border shadow-lg p-3 z-50 min-w-[280px] transition-shadow ${
+        isDragging ? 'cursor-grabbing shadow-2xl scale-105' : 'cursor-grab hover:shadow-xl'
+      } select-none`}
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        transition: isDragging ? 'none' : 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+      }}
+      onMouseDown={handleMouseDown}
+    >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
           <div 

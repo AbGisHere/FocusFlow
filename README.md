@@ -1,6 +1,6 @@
 # FocusFlow
 
-![Version](https://img.shields.io/badge/version-0.8.0-green.svg)
+![Version](https://img.shields.io/badge/version-0.9.0-green.svg)
 ![Status](https://img.shields.io/badge/status-under%20development-yellow.svg)
 
 > A modern productivity dashboard to manage tasks and calendar events in one place.
@@ -22,6 +22,7 @@ Currently, users have to **track todos in one app and events in another (or rely
 - [x] **Task Management:** Create tasks with priority, due date, and status
 - [x] **Kanban Board:** Three-column task organization (Pending, In Progress, Completed)
 - [x] **Real-time Updates:** Instant task status changes with dropdown menus
+- [x] **Drag and Drop:** Move tasks between columns to automatically update status
 - [x] **Dark/Light Theme:** Complete theme support with automatic switching
 - [x] **Responsive Design:** Works perfectly on desktop, tablet, and mobile
 - [x] **Modern UI:** Beautiful green-themed hover states and transitions
@@ -35,9 +36,44 @@ Currently, users have to **track todos in one app and events in another (or rely
 - [x] **Analytics Dashboard**: Complete analytics with study insights and progress tracking
 - [x] **Study Session Timer**: Interactive timer with pause/resume and automatic tracking
 - [x] **Global Timer with Minimized State**: Continue timing while using other app features
+- [x] **Timer Persistence**: Timer state survives page refreshes and browser sessions
+- [x] **Draggable Timer**: Position and save minimized timer anywhere on screen
 - [ ] **Reminders & Notifications:** Optional reminders for due tasks and upcoming events
 
 A modern productivity dashboard built with Next.js 15, TypeScript, and Better Auth.
+
+## 🚀 What's New in v0.9.0
+
+### 🎯 Major Features
+- **💾 Timer Persistence**: Timer state now survives page refreshes
+  - Running timers continue counting after page refresh
+  - Minimized timers stay minimized across browser sessions
+  - Accurate elapsed time calculation when restoring timers
+  - Automatic cleanup when timer sessions end
+  - LocalStorage-based persistence for reliable state management
+- **🎯 Draggable Minimized Timer**: Full drag-and-drop functionality
+  - Click and drag timer anywhere on the screen
+  - Position persists across page refreshes and browser sessions
+  - Smart corner snapping when dragged near edges (50px threshold)
+  - Smooth animations and visual feedback during dragging
+  - Prevents text selection during drag operations
+  - Constrained to viewport boundaries for optimal visibility
+- **📋 Drag and Drop Task Management**: Interactive Kanban board functionality
+  - Drag tasks between columns to automatically update status
+  - Optimistic updates for instant UI response
+  - Smooth animations matching timer drag behavior
+  - Visual feedback with hover states and drop zones
+  - Automatic backend sync with rollback on failure
+  - No text selection interference during drag operations
+
+### 🛠 Technical Improvements
+- **Enhanced State Management**: Timer context now uses localStorage for persistence
+- **Better Time Accuracy**: Improved elapsed time calculations across page refreshes
+- **Clean State Cleanup**: Proper localStorage cleanup when timer sessions end
+- **Drag System**: Custom drag implementation with mouse event handling
+- **Optimistic Updates**: Instant UI updates with background API synchronization
+- **Error Handling**: Robust error handling for localStorage and API operations
+- **Cross-browser Compatibility**: Webkit prefixes and fallbacks for Safari
 
 ## 🚀 What's New in v0.8.0
 

@@ -25,6 +25,8 @@ export default function TasksPage() {
   const [showEditForm, setShowEditForm] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const [draggedTask, setDraggedTask] = useState<Task | null>(null)
+  const [dragOverStatus, setDragOverStatus] = useState<Task["status"] | null>(null)
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
@@ -46,6 +48,18 @@ export default function TasksPage() {
   useEffect(() => {
     fetchTasks()
     fetchSubjects()
+  }, [])
+
+  // Cleanup cursor styles on component unmount
+  useEffect(() => {
+    return () => {
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      document.body.style.webkitUserSelect = ''
+      document.body.style.removeProperty('cursor')
+      document.body.style.removeProperty('user-select')
+      document.body.style.removeProperty('-webkit-user-select')
+    }
   }, [])
 
   const fetchSubjects = async () => {
@@ -185,6 +199,87 @@ export default function TasksPage() {
     }
   }
 
+  // Drag and drop handlers
+  const handleDragStart = (e: React.DragEvent, task: Task) => {
+    setDraggedTask(task)
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', task.id)
+    // Close any open dropdowns when starting to drag
+    setOpenDropdown(null)
+  }
+
+  const handleDragEnd = () => {
+    setDraggedTask(null)
+    setDragOverStatus(null)
+  }
+
+  const handleDragOver = (e: React.DragEvent, status: Task["status"]) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    setDragOverStatus(status)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    // Only clear drag over state if actually leaving the column
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setDragOverStatus(null)
+    }
+  }
+
+  const handleDrop = async (e: React.DragEvent, newStatus: Task["status"]) => {
+    e.preventDefault()
+    setDragOverStatus(null)
+    
+    if (!draggedTask || draggedTask.status === newStatus) return
+    
+    const oldStatus = draggedTask.status
+    const taskId = draggedTask.id
+    
+    // Optimistic update - update UI immediately
+    setTasks(prevTasks => 
+      prevTasks.map(task => 
+        task.id === taskId 
+          ? { ...task, status: newStatus }
+          : task
+      )
+    )
+    
+    // Clear dragged state immediately for smooth UX
+    setDraggedTask(null)
+    
+    try {
+      // Update backend in background
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include',
+        body: JSON.stringify({ status: newStatus }),
+      })
+      
+      if (!response.ok) {
+        // If backend update fails, revert the optimistic update
+        console.error("Failed to update task status:", response.status)
+        setTasks(prevTasks => 
+          prevTasks.map(task => 
+            task.id === taskId 
+              ? { ...task, status: oldStatus }
+              : task
+          )
+        )
+      }
+    } catch (error) {
+      // If network error occurs, revert the optimistic update
+      console.error("Failed to update task:", error)
+      setTasks(prevTasks => 
+        prevTasks.map(task => 
+          task.id === taskId 
+            ? { ...task, status: oldStatus }
+            : task
+        )
+      )
+    }
+  }
+
   // Group tasks by status
   const pendingTasks = tasks.filter(task => task.status === "TODO")
   const inProgressTasks = tasks.filter(task => task.status === "IN_PROGRESS")
@@ -213,7 +308,29 @@ export default function TasksPage() {
   }
 
   const TaskCard = ({ task }: { task: Task }) => (
-    <div className="bg-card p-4 rounded-xl shadow-sm border border-border mb-3">
+    <div 
+      className={`bg-card p-4 rounded-xl shadow-sm border border-border mb-3 transition-all duration-300 ease-in-out select-none cursor-grab active:cursor-grabbing ${
+        draggedTask?.id === task.id ? 'scale-[1.02] shadow-xl' : 'hover:shadow-md'
+      }`}
+      draggable
+      onClick={() => {
+        // Prepare card for immediate drag on next interaction
+        if (!draggedTask) {
+          // This makes the card "active" for immediate drag
+        }
+      }}
+      onDragStart={(e) => {
+        e.stopPropagation()
+        setDraggedTask(task)
+        e.dataTransfer.effectAllowed = 'move'
+        e.dataTransfer.setData('text/plain', task.id)
+        setOpenDropdown(null)
+      }}
+      onDragEnd={() => {
+        setDraggedTask(null)
+        setDragOverStatus(null)
+      }}
+    >
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-3 flex-1">
           <div className="mt-1">
@@ -247,7 +364,10 @@ export default function TasksPage() {
         <div className="relative">
           <button
             onClick={() => setOpenDropdown(openDropdown === task.id ? null : task.id)}
-            className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+            className={`p-1 text-muted-foreground hover:text-foreground transition-colors ${
+              openDropdown === task.id ? 'pointer-events-auto' : 'pointer-events-none'
+            }`}
+            style={{ pointerEvents: openDropdown === task.id ? 'auto' : 'none' }}
           >
             <ChevronDown className="h-4 w-4" />
           </button>
@@ -518,7 +638,14 @@ export default function TasksPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Pending Tasks */}
-            <div className="bg-card rounded-xl shadow-sm border border-border p-6">
+            <div 
+              className={`bg-card rounded-xl shadow-sm border border-border p-6 transition-colors duration-200 ${
+                dragOverStatus === "TODO" ? "bg-primary/10" : ""
+              }`}
+              onDragOver={(e) => handleDragOver(e, "TODO")}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, "TODO")}
+            >
               <div className="flex items-center space-x-2 mb-4">
                 <AlertCircle className="h-5 w-5 text-red-600" />
                 <h2 className="text-lg font-semibold text-foreground">Pending</h2>
@@ -534,7 +661,14 @@ export default function TasksPage() {
             </div>
 
             {/* In Progress Tasks */}
-            <div className="bg-card rounded-xl shadow-sm border border-border p-6">
+            <div 
+              className={`bg-card rounded-xl shadow-sm border border-border p-6 transition-colors duration-200 ${
+                dragOverStatus === "IN_PROGRESS" ? "bg-primary/10" : ""
+              }`}
+              onDragOver={(e) => handleDragOver(e, "IN_PROGRESS")}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, "IN_PROGRESS")}
+            >
               <div className="flex items-center space-x-2 mb-4">
                 <Clock className="h-5 w-5 text-yellow-600" />
                 <h2 className="text-lg font-semibold text-foreground">In Progress</h2>
@@ -550,7 +684,14 @@ export default function TasksPage() {
             </div>
 
             {/* Completed Tasks */}
-            <div className="bg-card rounded-xl shadow-sm border border-border p-6">
+            <div 
+              className={`bg-card rounded-xl shadow-sm border border-border p-6 transition-colors duration-200 ${
+                dragOverStatus === "DONE" ? "bg-primary/10" : ""
+              }`}
+              onDragOver={(e) => handleDragOver(e, "DONE")}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, "DONE")}
+            >
               <div className="flex items-center space-x-2 mb-4">
                 <CheckSquare className="h-5 w-5 text-green-600" />
                 <h2 className="text-lg font-semibold text-foreground">Completed</h2>
