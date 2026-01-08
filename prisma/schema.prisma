@@ -20,6 +20,7 @@ model User {
   sessions      Session[]
   subjects      Subject[]
   tasks         Task[]
+  studySessions  StudySession[]
 
   @@map("users")
 }
@@ -104,6 +105,7 @@ model Event {
   subjectId        String?
   subject          Subject?  @relation(fields: [subjectId], references: [id])
   user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studySessions    StudySession[]
 
   @@map("events")
 }
@@ -120,4 +122,17 @@ model Subject {
   tasks     Task[]
 
   @@map("subjects")
+}
+
+model StudySession {
+  id          String   @id @default(cuid())
+  eventId     String
+  startTime    DateTime @default(now())
+  endTime      DateTime?
+  durationMs   Int?     // Duration in milliseconds
+  userId      String
+  event       Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("study_sessions")
 }

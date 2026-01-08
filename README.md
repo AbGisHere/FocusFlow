@@ -1,6 +1,6 @@
 # FocusFlow
 
-![Version](https://img.shields.io/badge/version-0.6.0-green.svg)
+![Version](https://img.shields.io/badge/version-0.7.0-green.svg)
 ![Status](https://img.shields.io/badge/status-under%20development-yellow.svg)
 
 > A modern productivity dashboard to manage tasks and calendar events in one place.
@@ -32,9 +32,36 @@ Currently, users have to **track todos in one app and events in another (or rely
 - [x] **Glassmorphism Design**: Modern frosted glass effects throughout UI
 - [x] **Enhanced Task Display**: Shows due dates, priority badges, and status indicators
 - [x] **Event Integration**: View all events related to specific subjects
+- [x] **Analytics Dashboard**: Complete analytics with study insights and progress tracking
+- [x] **Study Session Timer**: Interactive timer with pause/resume and automatic tracking
 - [ ] **Reminders & Notifications:** Optional reminders for due tasks and upcoming events
 
 A modern productivity dashboard built with Next.js 15, TypeScript, and Better Auth.
+
+## 🚀 What's New in v0.7.0
+
+### 🎯 Major Features
+- **📊 Analytics Dashboard**: Complete analytics tab with study session insights and progress tracking
+  - Study hours by subject with visual charts
+  - Task completion statistics and status distribution
+  - Weekly and monthly progress trends
+  - Subject-wise session details and average durations
+- **⏱️ Interactive Study Timer**: Built-in timer for tracking study session duration
+  - Real-time countdown display with hours:minutes:seconds format
+  - Pause/Resume functionality during study sessions
+  - Automatic session saving when timer ends
+  - Seamless integration with calendar events
+- **💾 Session Persistence**: Study sessions automatically saved to database
+  - Duration tracking in milliseconds for precise analytics
+  - Linked to calendar events for complete study history
+  - Real-time updates across the application
+
+### 🔧 Bug Fixes
+- **Fixed Study Session API**: Resolved 500 error when saving study sessions
+- **Database Schema**: Added StudySession table for proper session tracking
+- **Timer Accuracy**: Improved precision for session duration calculations
+
+---
 
 ## 🚀 What's New in v0.6.0
 

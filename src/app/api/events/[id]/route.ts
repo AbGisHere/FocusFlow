@@ -22,6 +22,9 @@ export async function GET(
         id: id,
         userId: session.user.id 
       },
+      include: {
+        subject: true,
+      },
     })
 
     if (!event) {

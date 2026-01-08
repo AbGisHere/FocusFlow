@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Calendar as CalendarIcon, Plus, Clock, MapPin, Trash2, ChevronDown, AlertCircle, CheckSquare, Pencil } from "lucide-react"
+import { Calendar as CalendarIcon, Plus, Clock, MapPin, Trash2, ChevronDown, AlertCircle, CheckSquare, Pencil, Play } from "lucide-react"
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from "date-fns"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
@@ -784,6 +784,18 @@ export default function CalendarPage() {
                                 >
                                   <Plus className="h-3 w-3" />
                                   <span>Join</span>
+                                </button>
+                              )}
+                              {event.subject && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    window.location.href = `/timer/${event.id}`
+                                  }}
+                                  className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-primary/20 transition-colors flex items-center space-x-2"
+                                >
+                                  <Play className="h-3 w-3" />
+                                  <span>Start</span>
                                 </button>
                               )}
                               <button

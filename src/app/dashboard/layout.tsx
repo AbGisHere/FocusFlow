@@ -1,6 +1,6 @@
 "use client"
 
-import { Calendar, CheckSquare, BookOpen, Calendar as CalendarIcon } from "lucide-react"
+import { Calendar, CheckSquare, BookOpen, Calendar as CalendarIcon, TrendingUp } from "lucide-react"
 import Link from "next/link"
 import { authClient } from "@/lib/auth-client"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -77,6 +77,13 @@ export default function DashboardLayout({
                   >
                     <BookOpen className="h-4 w-4" />
                     <span>Subjects</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/analytics"
+                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <TrendingUp className="h-4 w-4" />
+                    <span>Analytics</span>
                   </Link>
                 </div>
               </div>
