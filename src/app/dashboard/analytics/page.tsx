@@ -202,7 +202,7 @@ export default function AnalyticsPage() {
               <BarChart data={analyticsData.subjectStats}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="subjectName" />
-                <YAxis />
+                <YAxis tickFormatter={(value: number) => formatHours(value)} />
                 <Tooltip formatter={(value: number | undefined) => value !== undefined ? [formatHours(value), 'Hours'] : ['', '']} />
                 <Bar dataKey="totalHours" fill="#10b981" />
               </BarChart>

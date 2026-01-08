@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/contexts/theme-context"
+import { TimerProvider } from "@/contexts/timer-context"
+import { MinimizedTimer } from "@/components/minimized-timer"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -19,7 +21,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider defaultTheme="system">
-          {children}
+          <TimerProvider>
+            {children}
+            <MinimizedTimer />
+          </TimerProvider>
         </ThemeProvider>
       </body>
     </html>

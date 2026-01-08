@@ -55,7 +55,7 @@ export function ProfileDropdown({ user }: ProfileDropdownProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 rounded-lg py-1 z-50 bg-background/95 supports-[backdrop-filter]:bg-background/90 backdrop-blur-[40px] backdrop-saturate-150 border border-border/60 shadow-sm">
+        <div className="absolute right-0 mt-2 w-48 rounded-lg py-1 z-50 bg-card/90 backdrop-blur-sm border border-border shadow-lg">
           <div className="px-4 py-2 border-b border-border">
             <p className="text-sm font-medium text-foreground">
               {user.name || "User"}

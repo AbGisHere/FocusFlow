@@ -1,6 +1,6 @@
 # FocusFlow
 
-![Version](https://img.shields.io/badge/version-0.7.0-green.svg)
+![Version](https://img.shields.io/badge/version-0.8.0-green.svg)
 ![Status](https://img.shields.io/badge/status-under%20development-yellow.svg)
 
 > A modern productivity dashboard to manage tasks and calendar events in one place.
@@ -34,9 +34,26 @@ Currently, users have to **track todos in one app and events in another (or rely
 - [x] **Event Integration**: View all events related to specific subjects
 - [x] **Analytics Dashboard**: Complete analytics with study insights and progress tracking
 - [x] **Study Session Timer**: Interactive timer with pause/resume and automatic tracking
+- [x] **Global Timer with Minimized State**: Continue timing while using other app features
 - [ ] **Reminders & Notifications:** Optional reminders for due tasks and upcoming events
 
 A modern productivity dashboard built with Next.js 15, TypeScript, and Better Auth.
+
+## 🚀 What's New in v0.8.0
+
+### 🎯 Major Features
+- **⏱️ Global Timer with Minimized State**: Seamless timer experience across the app
+  - Continue timing while browsing other parts of the app
+  - Minimized timer appears in the bottom-right corner
+  - Preserves timer state when navigating between pages
+  - Quick access to pause/resume and end session controls
+  - Matches app's frosted glass design language
+
+### 🛠 Improvements
+- **Consistent UI Styling**: Unified frosted glass appearance across all components
+- **Enhanced Navigation**: Smoother transitions when moving between timer and other pages
+- **Better State Management**: Timer state persists correctly during navigation
+- **Improved Mobile Experience**: Optimized timer controls for touch devices
 
 ## 🚀 What's New in v0.7.0
 
