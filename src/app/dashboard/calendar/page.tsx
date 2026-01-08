@@ -27,6 +27,11 @@ interface Event {
   createdAt: string
   updatedAt: string
   userId: string
+  subject?: {
+    id: string
+    name: string
+    color: string
+  }
 }
 
 export default function CalendarPage() {
@@ -43,11 +48,29 @@ export default function CalendarPage() {
     startTime: "",
     endTime: "",
     location: "",
+    subjectId: "",
   })
+
+  const [subjects, setSubjects] = useState<Array<{id: string, name: string, color: string}>>([])
 
   useEffect(() => {
     fetchData()
+    fetchSubjects()
   }, [])
+
+  const fetchSubjects = async () => {
+    try {
+      const response = await fetch("/api/subjects", {
+        credentials: 'include'
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setSubjects(data)
+      }
+    } catch (error) {
+      console.error("Failed to fetch subjects:", error)
+    }
+  }
 
   const fetchData = async () => {
     try {
@@ -85,7 +108,7 @@ export default function CalendarPage() {
         body: JSON.stringify(newEvent),
       })
       if (response.ok) {
-        setNewEvent({ title: "", description: "", startTime: "", endTime: "", location: "" })
+        setNewEvent({ title: "", description: "", startTime: "", endTime: "", location: "", subjectId: "" })
         setShowAddForm(false)
         fetchData()
       } else {
@@ -289,6 +312,24 @@ export default function CalendarPage() {
                 onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
                 className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background text-foreground"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">
+                Subject
+              </label>
+              <select
+                value={newEvent.subjectId}
+                onChange={(e) => setNewEvent({ ...newEvent, subjectId: e.target.value })}
+                className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background text-foreground"
+              >
+                <option value="">No Subject</option>
+                {subjects.map(subject => (
+                  <option key={subject.id} value={subject.id}>
+                    {subject.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="flex space-x-3">

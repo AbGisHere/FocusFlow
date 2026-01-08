@@ -1,9 +1,11 @@
 # FocusFlow
 
-![Version](https://img.shields.io/badge/version-0.4.2-green.svg)
+![Version](https://img.shields.io/badge/version-0.5.0-green.svg)
 ![Status](https://img.shields.io/badge/status-under%20development-yellow.svg)
 
 > A modern productivity dashboard to manage tasks and calendar events in one place.
+
+🔗 **Live Demo:** [https://FocusFlow-AbG.vercel.app](https://FocusFlow-AbG.vercel.app)
 
 ---
 
@@ -24,16 +26,54 @@ Currently, users have to **track todos in one app and events in another (or rely
 - [x] **Responsive Design:** Works perfectly on desktop, tablet, and mobile
 - [x] **Modern UI:** Beautiful green-themed hover states and transitions
 - [x] **Calendar Experience**: Full calendar view with month/week/day options
+- [x] **Subject Management**: Create and organize subjects with custom colors
+- [x] **Expandable Subject Views**: Click subjects to see related tasks and events
+- [x] **In-line Task Status Updates**: Change task status directly from subject view
+- [x] **Glassmorphism Design**: Modern frosted glass effects throughout UI
+- [x] **Enhanced Task Display**: Shows due dates, priority badges, and status indicators
+- [x] **Event Integration**: View all events related to specific subjects
 - [ ] **Reminders & Notifications:** Optional reminders for due tasks and upcoming events
 
 A modern productivity dashboard built with Next.js 15, TypeScript, and Better Auth.
+
+## 🚀 What's New in v0.5.0
+
+### Major Features
+- **📚 Subject Management System**: Create and organize subjects with custom colors
+- **🔍 Expandable Subject Views**: Click any subject to see all related tasks and events
+- **⚡ In-line Task Status Updates**: Change task status directly from subject view with dropdown menus
+- **🎨 Glassmorphism Design**: Modern frosted glass effects throughout the UI
+- **📋 Enhanced Task Display**: Shows due dates, priority badges, and status indicators
+- **📅 Event Integration**: View all events related to specific subjects
+
+### UI/UX Enhancements
+- **Frosted Glass Effects**: Beautiful backdrop blur effects on headers and content containers
+- **Improved Dropdown Menus**: Fixed visibility issues with portal-based dropdowns
+- **Better Visual Hierarchy**: Clear separation between containers and content items
+- **Enhanced Color Coding**: Consistent status indicators and priority badges
+- **Smooth Animations**: Improved transitions and hover effects throughout
+
+### Subject Tab Features
+- **Expandable Cards**: Click subjects to reveal related tasks and events
+- **Real-time Status Updates**: Change task status without leaving the subject view
+- **Due Date Display**: See task due dates directly in the expanded view
+- **Priority Badges**: Visual priority indicators (High/Medium/Low)
+- **Event Integration**: View all events associated with each subject
+- **Smart Caching**: Efficient data loading with caching for better performance
+
+### Technical Improvements
+- **Portal-based Dropdowns**: Fixed dropdown visibility issues across all containers
+- **Enhanced State Management**: Improved caching and data flow
+- **Better Error Handling**: More robust API error management
+- **Performance Optimizations**: Reduced unnecessary re-renders and API calls
+- **Type Safety**: Enhanced TypeScript interfaces for better development experience
 
 ## 🚀 What's New in v0.4.0
 
 ### Major Improvements
 - **🎨 Enhanced UI Components**: Refined form inputs and buttons with consistent green theme
 - **🔒 Improved Authentication Flow**: Better session management and error handling
-- **� Calendar Integration**: Seamless event management with the task system
+- **📅 Calendar Integration**: Seamless event management with the task system
 - **🌓 Theme Refinements**: Better contrast and accessibility in both light and dark modes
 - **✨ UI Polish**: Consistent styling across all interactive elements
 - **� Responsive Improvements**: Better mobile experience for forms and dropdowns
@@ -167,10 +207,12 @@ src/
 │   ├── api/               # API routes
 │   │   ├── auth/         # Better Auth endpoints
 │   │   ├── tasks/        # Task management API
-│   │   └── events/       # Events API
+│   │   ├── events/       # Events API
+│   │   └── subjects/     # Subject management API
 │   ├── dashboard/        # Protected dashboard pages
 │   │   ├── page.tsx      # Main dashboard
 │   │   ├── tasks/        # Kanban task board
+│   │   ├── subjects/     # Subject management with expandable views
 │   │   └── layout.tsx    # Dashboard layout
 │   ├── sign-in/          # Authentication page
 │   ├── globals.css       # Global styles

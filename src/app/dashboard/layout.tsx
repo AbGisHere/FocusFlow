@@ -1,6 +1,6 @@
 "use client"
 
-import { Calendar, CheckSquare, Calendar as CalendarIcon } from "lucide-react"
+import { Calendar, CheckSquare, BookOpen, Calendar as CalendarIcon } from "lucide-react"
 import Link from "next/link"
 import { authClient } from "@/lib/auth-client"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -71,6 +71,13 @@ export default function DashboardLayout({
                     <Calendar className="h-4 w-4" />
                     <span>Calendar</span>
                   </Link>
+                  <Link
+                    href="/dashboard/subjects"
+                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    <span>Subjects</span>
+                  </Link>
                 </div>
               </div>
 
@@ -86,7 +93,7 @@ export default function DashboardLayout({
         </nav>
       </FrostedHeader>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8 overflow-visible">
         {children}
       </main>
     </div>

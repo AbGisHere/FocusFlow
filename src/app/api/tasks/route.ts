@@ -9,13 +9,20 @@ export async function GET(request: NextRequest) {
       headers: request.headers
     })
     
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    const { searchParams } = new URL(request.url)
+    const subjectId = searchParams.get('subjectId')
 
     const tasks = await prisma.task.findMany({
       where: {
         userId: session.user.id,
+        ...(subjectId && { subjectId }),
+      },
+      include: {
+        subject: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -36,11 +43,11 @@ export async function POST(request: NextRequest) {
       headers: request.headers
     })
     
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { title, description, status, priority, dueDate } = await request.json()
+    const { title, description, status, priority, dueDate, subjectId } = await request.json()
 
     if (!title) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 })
@@ -53,7 +60,11 @@ export async function POST(request: NextRequest) {
         status: status || "TODO",
         priority: priority || "MEDIUM",
         dueDate: dueDate ? new Date(dueDate) : null,
+        subjectId: subjectId && subjectId !== "" ? subjectId : null,
         userId: session.user.id,
+      },
+      include: {
+        subject: true,
       },
     })
 

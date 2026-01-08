@@ -8,12 +8,21 @@ export async function GET(request: NextRequest) {
       headers: request.headers
     })
     
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const { searchParams } = new URL(request.url)
+    const subjectId = searchParams.get('subjectId')
+
     const events = await prisma.event.findMany({
-      where: { userId: session.user.id },
+      where: { 
+        userId: session.user.id,
+        ...(subjectId && { subjectId }),
+      },
+      include: {
+        subject: true,
+      },
       orderBy: { startTime: 'asc' },
       take: 5,
     })
@@ -31,11 +40,11 @@ export async function POST(request: NextRequest) {
       headers: request.headers
     })
     
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { title, description, startTime, endTime, location } = await request.json()
+    const { title, description, startTime, endTime, location, subjectId } = await request.json()
 
     const event = await prisma.event.create({
       data: {
@@ -44,7 +53,11 @@ export async function POST(request: NextRequest) {
         startTime: new Date(startTime),
         endTime: new Date(endTime),
         location,
+        subjectId: subjectId && subjectId !== "" ? subjectId : null,
         userId: session.user.id,
+      },
+      include: {
+        subject: true,
       },
     })
 

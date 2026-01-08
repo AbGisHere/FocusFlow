@@ -11,6 +11,11 @@ interface Task {
   priority: "LOW" | "MEDIUM" | "HIGH"
   dueDate?: string
   createdAt: string
+  subject?: {
+    id: string
+    name: string
+    color: string
+  }
 }
 
 export default function TasksPage() {
@@ -25,6 +30,7 @@ export default function TasksPage() {
     description: "",
     priority: "MEDIUM" as "LOW" | "MEDIUM" | "HIGH",
     dueDate: "",
+    subjectId: "",
   })
 
   const [editTask, setEditTask] = useState({
@@ -32,11 +38,29 @@ export default function TasksPage() {
     description: "",
     priority: "MEDIUM" as "LOW" | "MEDIUM" | "HIGH",
     dueDate: "",
+    subjectId: "",
   })
+
+  const [subjects, setSubjects] = useState<Array<{id: string, name: string, color: string}>>([])
 
   useEffect(() => {
     fetchTasks()
+    fetchSubjects()
   }, [])
+
+  const fetchSubjects = async () => {
+    try {
+      const response = await fetch("/api/subjects", {
+        credentials: 'include'
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setSubjects(data)
+      }
+    } catch (error) {
+      console.error("Failed to fetch subjects:", error)
+    }
+  }
 
   const fetchTasks = async () => {
     try {
@@ -66,7 +90,7 @@ export default function TasksPage() {
         body: JSON.stringify(newTask),
       })
       if (response.ok) {
-        setNewTask({ title: "", description: "", priority: "MEDIUM", dueDate: "" })
+        setNewTask({ title: "", description: "", priority: "MEDIUM", dueDate: "", subjectId: "" })
         setShowAddForm(false)
         fetchTasks()
       } else {
@@ -125,6 +149,7 @@ export default function TasksPage() {
       description: task.description ?? "",
       priority: task.priority,
       dueDate: task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 10) : "",
+      subjectId: task.subject?.id || "",
     })
     setShowEditForm(true)
     setOpenDropdown(null)
@@ -144,6 +169,7 @@ export default function TasksPage() {
           description: editTask.description,
           priority: editTask.priority,
           dueDate: editTask.dueDate ? new Date(editTask.dueDate).toISOString() : "",
+          subjectId: editTask.subjectId || null,
         }),
       })
 
@@ -199,6 +225,14 @@ export default function TasksPage() {
               <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(task.priority)}`}>
                 {task.priority}
               </span>
+              {task.subject && (
+                <span 
+                  className="px-2 py-1 text-xs font-medium rounded-full text-white"
+                  style={{ backgroundColor: task.subject.color }}
+                >
+                  {task.subject.name}
+                </span>
+              )}
             </div>
             {task.description && (
               <p className="text-muted-foreground mt-1">{task.description}</p>
@@ -328,15 +362,33 @@ export default function TasksPage() {
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
-                  Due Date
+                  Subject
                 </label>
-                <input
-                  type="date"
-                  value={newTask.dueDate}
-                  onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+                <select
+                  value={newTask.subjectId}
+                  onChange={(e) => setNewTask({ ...newTask, subjectId: e.target.value })}
                   className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background text-foreground"
-                />
+                >
+                  <option value="">No Subject</option>
+                  {subjects.map(subject => (
+                    <option key={subject.id} value={subject.id}>
+                      {subject.name}
+                    </option>
+                  ))}
+                </select>
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">
+                Due Date
+              </label>
+              <input
+                type="date"
+                value={newTask.dueDate}
+                onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+                className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background text-foreground"
+              />
             </div>
 
             <div className="flex space-x-3">
@@ -405,15 +457,33 @@ export default function TasksPage() {
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">
-                  Due Date
+                  Subject
                 </label>
-                <input
-                  type="date"
-                  value={editTask.dueDate}
-                  onChange={(e) => setEditTask({ ...editTask, dueDate: e.target.value })}
+                <select
+                  value={editTask.subjectId}
+                  onChange={(e) => setEditTask({ ...editTask, subjectId: e.target.value })}
                   className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background text-foreground"
-                />
+                >
+                  <option value="">No Subject</option>
+                  {subjects.map(subject => (
+                    <option key={subject.id} value={subject.id}>
+                      {subject.name}
+                    </option>
+                  ))}
+                </select>
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">
+                Due Date
+              </label>
+              <input
+                type="date"
+                value={editTask.dueDate}
+                onChange={(e) => setEditTask({ ...editTask, dueDate: e.target.value })}
+                className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background text-foreground"
+              />
             </div>
 
             <div className="flex space-x-3">

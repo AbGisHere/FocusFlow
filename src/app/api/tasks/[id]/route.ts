@@ -23,6 +23,9 @@ export async function GET(
         id: id,
         userId: session.user.id,
       },
+      include: {
+        subject: true,
+      },
     })
 
     if (!task) {
@@ -52,7 +55,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { title, description, status, priority, dueDate } = await request.json()
+    const { title, description, status, priority, dueDate, subjectId } = await request.json()
 
     const task = await prisma.task.update({
       where: {
@@ -65,6 +68,10 @@ export async function PATCH(
         status,
         priority,
         dueDate: dueDate ? new Date(dueDate) : undefined,
+        subjectId: subjectId || null,
+      },
+      include: {
+        subject: true,
       },
     })
 
