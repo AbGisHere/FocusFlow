@@ -4,8 +4,9 @@ import { prisma } from "@/lib/prisma"
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
+  const { params } = context
   try {
     const session = await auth.api.getSession({
       headers: request.headers
@@ -35,8 +36,9 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
+  const { params } = context
   try {
     const session = await auth.api.getSession({
       headers: request.headers
@@ -71,8 +73,9 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
+  const { params } = context
   try {
     const session = await auth.api.getSession({
       headers: request.headers
