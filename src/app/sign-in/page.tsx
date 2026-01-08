@@ -24,25 +24,25 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8">
+        <div className="bg-card rounded-xl shadow-lg border border-border p-8">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center space-x-2 mb-4">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">F</span>
+              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-lg">F</span>
               </div>
-              <span className="text-2xl font-bold text-slate-900">FocusFlow</span>
+              <span className="text-2xl font-bold text-foreground">FocusFlow</span>
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 mb-2">Welcome back</h1>
-            <p className="text-slate-600">Sign in to your account to continue</p>
+            <h1 className="text-2xl font-bold text-foreground mb-2">Welcome back</h1>
+            <p className="text-muted-foreground">Sign in to your account to continue</p>
           </div>
 
           <div className="space-y-4">
             <button
               onClick={handleGoogleSignIn}
               disabled={isLoading}
-              className="w-full flex items-center justify-center space-x-3 px-4 py-3 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center space-x-3 px-4 py-3 border border-border rounded-lg hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Chrome className="h-5 w-5" />
               <span className="font-medium">
@@ -52,19 +52,19 @@ export default function SignInPage() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-300" />
+                <div className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-slate-500">or</span>
+                <span className="px-2 bg-card text-muted-foreground">or</span>
               </div>
             </div>
 
             <div className="text-center">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-muted-foreground">
                 Don't have an account?{" "}
                 <button
                   onClick={handleGoogleSignIn}
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-primary hover:text-primary/80 font-medium"
                 >
                   Sign up with Google
                 </button>
@@ -72,19 +72,19 @@ export default function SignInPage() {
             </div>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-slate-200">
-            <div className="flex items-center justify-center space-x-6 text-sm text-slate-500">
+          <div className="mt-8 pt-6 border-t border-border">
+            <div className="flex items-center justify-center space-x-6 text-sm text-muted-foreground">
               <a
                 href="https://github.com/AbGisHere/FocusFlow"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-1 hover:text-slate-700"
+                className="flex items-center space-x-1 hover:text-foreground"
               >
                 <Github className="h-4 w-4" />
                 <span>GitHub</span>
               </a>
               <span>•</span>
-              <span>v0.1.0</span>
+              <span>v0.2.0</span>
             </div>
           </div>
         </div>

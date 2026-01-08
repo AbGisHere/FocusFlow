@@ -1,6 +1,6 @@
 # FocusFlow
 
-![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)
 ![Status](https://img.shields.io/badge/status-development-orange)
 
 > A lightweight productivity dashboard to manage tasks and calendar events in one place.

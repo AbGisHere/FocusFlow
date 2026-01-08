@@ -33,30 +33,30 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
-        <p className="text-slate-600 mt-2">
+        <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+        <p className="text-muted-foreground mt-2">
           Welcome back, {session.data.user.name || session.data.user.email}!
         </p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-600">Total Tasks</p>
-              <p className="text-2xl font-bold text-slate-900">{taskStats.total}</p>
+              <p className="text-sm font-medium text-muted-foreground">Total Tasks</p>
+              <p className="text-2xl font-bold text-foreground">{taskStats.total}</p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <CheckSquare className="h-6 w-6 text-blue-600" />
+            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+              <CheckSquare className="h-6 w-6 text-primary" />
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-600">Completed</p>
+              <p className="text-sm font-medium text-muted-foreground">Completed</p>
               <p className="text-2xl font-bold text-green-600">{taskStats.completed}</p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -65,10 +65,10 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-600">In Progress</p>
+              <p className="text-sm font-medium text-muted-foreground">In Progress</p>
               <p className="text-2xl font-bold text-yellow-600">{taskStats.inProgress}</p>
             </div>
             <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
@@ -77,10 +77,10 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-600">Upcoming Events</p>
+              <p className="text-sm font-medium text-muted-foreground">Upcoming Events</p>
               <p className="text-2xl font-bold text-purple-600">{events.length}</p>
             </div>
             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
