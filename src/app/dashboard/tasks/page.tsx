@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Plus, CheckSquare, Clock, AlertCircle, ChevronDown } from "lucide-react"
-import { authClient } from "@/lib/auth-client"
+import { Plus, CheckSquare, Clock, AlertCircle, ChevronDown, Trash2, Pencil } from "lucide-react"
 
 interface Task {
   id: string
@@ -18,8 +17,17 @@ export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [showEditForm, setShowEditForm] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [newTask, setNewTask] = useState({
+    title: "",
+    description: "",
+    priority: "MEDIUM" as "LOW" | "MEDIUM" | "HIGH",
+    dueDate: "",
+  })
+
+  const [editTask, setEditTask] = useState({
     title: "",
     description: "",
     priority: "MEDIUM" as "LOW" | "MEDIUM" | "HIGH",
@@ -93,6 +101,64 @@ export default function TasksPage() {
     updateTaskStatus(taskId, status)
   }
 
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: "DELETE",
+        credentials: 'include',
+      })
+      if (response.ok) {
+        fetchTasks()
+        setOpenDropdown(null)
+      } else {
+        console.error("Failed to delete task:", response.status)
+      }
+    } catch (error) {
+      console.error("Failed to delete task:", error)
+    }
+  }
+
+  const openEditTask = (task: Task) => {
+    setEditingTask(task)
+    setEditTask({
+      title: task.title,
+      description: task.description ?? "",
+      priority: task.priority,
+      dueDate: task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 10) : "",
+    })
+    setShowEditForm(true)
+    setOpenDropdown(null)
+  }
+
+  const handleEditTask = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingTask) return
+
+    try {
+      const response = await fetch(`/api/tasks/${editingTask.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include',
+        body: JSON.stringify({
+          title: editTask.title,
+          description: editTask.description,
+          priority: editTask.priority,
+          dueDate: editTask.dueDate ? new Date(editTask.dueDate).toISOString() : "",
+        }),
+      })
+
+      if (response.ok) {
+        setShowEditForm(false)
+        setEditingTask(null)
+        fetchTasks()
+      } else {
+        console.error("Failed to update task:", response.status)
+      }
+    } catch (error) {
+      console.error("Failed to update task:", error)
+    }
+  }
+
   // Group tasks by status
   const pendingTasks = tasks.filter(task => task.status === "TODO")
   const inProgressTasks = tasks.filter(task => task.status === "IN_PROGRESS")
@@ -153,7 +219,7 @@ export default function TasksPage() {
           </button>
           
           {openDropdown === task.id && (
-            <div className="absolute right-0 mt-1 w-32 bg-card border border-border rounded-lg shadow-lg z-10">
+            <div className="absolute right-0 mt-1 w-32 rounded-lg z-10 bg-background/75 supports-[backdrop-filter]:bg-background/60 backdrop-blur-xl backdrop-saturate-150 border border-border/60 shadow-sm">
               <button
                 onClick={() => handleStatusChange(task.id, "TODO")}
                 className="w-full text-left px-3 py-2 text-sm hover:bg-primary/20 transition-colors flex items-center space-x-2"
@@ -174,6 +240,22 @@ export default function TasksPage() {
               >
                 <CheckSquare className="h-3 w-3" />
                 <span>Completed</span>
+              </button>
+              <div className="border-t border-border"></div>
+              <button
+                onClick={() => openEditTask(task)}
+                className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-primary/20 transition-colors flex items-center space-x-2"
+              >
+                <Pencil className="h-3 w-3" />
+                <span>Edit</span>
+              </button>
+              <div className="border-t border-border"></div>
+              <button
+                onClick={() => handleDeleteTask(task.id)}
+                className="w-full text-left px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors flex items-center space-x-2"
+              >
+                <Trash2 className="h-3 w-3" />
+                <span>Delete</span>
               </button>
             </div>
           )}
@@ -267,7 +349,87 @@ export default function TasksPage() {
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="px-4 py-2 border border-input text-foreground rounded-lg hover:bg-muted transition-colors"
+                className="px-4 py-2 border border-input text-primary rounded-lg hover:bg-primary/10 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {showEditForm && editingTask && (
+        <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
+          <h2 className="text-lg font-semibold text-foreground mb-4">Edit Task</h2>
+          <form onSubmit={handleEditTask} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">
+                Title
+              </label>
+              <input
+                type="text"
+                value={editTask.title}
+                onChange={(e) => setEditTask({ ...editTask, title: e.target.value })}
+                className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background text-foreground"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">
+                Description
+              </label>
+              <textarea
+                value={editTask.description}
+                onChange={(e) => setEditTask({ ...editTask, description: e.target.value })}
+                className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background text-foreground"
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Priority
+                </label>
+                <select
+                  value={editTask.priority}
+                  onChange={(e) => setEditTask({ ...editTask, priority: e.target.value as Task["priority"] })}
+                  className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background text-foreground"
+                >
+                  <option value="LOW">Low</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="HIGH">High</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Due Date
+                </label>
+                <input
+                  type="date"
+                  value={editTask.dueDate}
+                  onChange={(e) => setEditTask({ ...editTask, dueDate: e.target.value })}
+                  className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background text-foreground"
+                />
+              </div>
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                type="submit"
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                Save Changes
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowEditForm(false)
+                  setEditingTask(null)
+                }}
+                className="px-4 py-2 border border-input text-primary rounded-lg hover:bg-primary/10 transition-colors"
               >
                 Cancel
               </button>

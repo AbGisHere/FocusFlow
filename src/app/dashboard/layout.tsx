@@ -1,6 +1,6 @@
 "use client"
 
-import { Calendar, CheckSquare } from "lucide-react"
+import { Calendar, CheckSquare, Calendar as CalendarIcon } from "lucide-react"
 import Link from "next/link"
 import { authClient } from "@/lib/auth-client"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -54,7 +54,7 @@ export default function DashboardLayout({
                     href="/dashboard"
                     className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
                   >
-                    <Calendar className="h-4 w-4" />
+                    <CalendarIcon className="h-4 w-4" />
                     <span>Dashboard</span>
                   </Link>
                   <Link
@@ -63,6 +63,13 @@ export default function DashboardLayout({
                   >
                     <CheckSquare className="h-4 w-4" />
                     <span>Tasks</span>
+                  </Link>
+                  <Link
+                    href="/dashboard/calendar"
+                    className="flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    <span>Calendar</span>
                   </Link>
                 </div>
               </div>
