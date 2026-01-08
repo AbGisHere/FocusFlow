@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
+// ✅ GET Task
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> } // Fix: Type is Promise
 ) {
-  const { params } = context
   try {
+    const { id } = await params // Fix: Await the params
+
     const session = await auth.api.getSession({
       headers: request.headers
     })
@@ -16,30 +18,32 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const event = await prisma.event.findFirst({
+    const task = await prisma.task.findFirst({
       where: {
-        id: params.id,
+        id: id,
         userId: session.user.id,
       },
     })
 
-    if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 })
+    if (!task) {
+      return NextResponse.json({ error: "Task not found" }, { status: 404 })
     }
 
-    return NextResponse.json(event)
+    return NextResponse.json(task)
   } catch (error) {
-    console.error("Failed to fetch event:", error)
+    console.error("Failed to fetch task:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 
+// ✅ PATCH Task
 export async function PATCH(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> } // Fix: Type is Promise
 ) {
-  const { params } = context
   try {
+    const { id } = await params // Fix: Await the params
+
     const session = await auth.api.getSession({
       headers: request.headers
     })
@@ -48,35 +52,37 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { title, description, startTime, endTime, location } = await request.json()
+    const { title, description, status, priority, dueDate } = await request.json()
 
-    const event = await prisma.event.update({
+    const task = await prisma.task.update({
       where: {
-        id: params.id,
+        id: id,
         userId: session.user.id,
       },
       data: {
         title,
         description,
-        startTime: new Date(startTime),
-        endTime: new Date(endTime),
-        location,
+        status,
+        priority,
+        dueDate: dueDate ? new Date(dueDate) : undefined,
       },
     })
 
-    return NextResponse.json(event)
+    return NextResponse.json(task)
   } catch (error) {
-    console.error("Failed to update event:", error)
+    console.error("Failed to update task:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 
+// ✅ DELETE Task
 export async function DELETE(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> } // Fix: Type is Promise
 ) {
-  const { params } = context
   try {
+    const { id } = await params // Fix: Await the params
+
     const session = await auth.api.getSession({
       headers: request.headers
     })
@@ -85,16 +91,16 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    await prisma.event.delete({
+    await prisma.task.delete({
       where: {
-        id: params.id,
+        id: id,
         userId: session.user.id,
       },
     })
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("Failed to delete event:", error)
+    console.error("Failed to delete task:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

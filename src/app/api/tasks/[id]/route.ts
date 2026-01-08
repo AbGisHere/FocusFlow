@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
-export async function PATCH(
+// ✅ GET Task
+export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+
     const session = await auth.api.getSession({
       headers: request.headers
     })
@@ -15,23 +18,54 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { title, description, priority, dueDate, status } = await request.json()
+    const task = await prisma.task.findFirst({
+      where: {
+        id: id,
+        userId: session.user.id,
+      },
+    })
 
-    const data: Record<string, unknown> = {}
-    if (typeof title === "string") data.title = title
-    if (typeof description === "string" || description === null) data.description = description
-    if (typeof priority === "string") data.priority = priority
-    if (typeof status === "string") data.status = status
-    if (typeof dueDate === "string") {
-      data.dueDate = dueDate ? new Date(dueDate) : null
+    if (!task) {
+      return NextResponse.json({ error: "Task not found" }, { status: 404 })
     }
+
+    return NextResponse.json(task)
+  } catch (error) {
+    console.error("Failed to fetch task:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
+}
+
+// ✅ PATCH Task
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+
+    const session = await auth.api.getSession({
+      headers: request.headers
+    })
+    
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { title, description, status, priority, dueDate } = await request.json()
 
     const task = await prisma.task.update({
       where: {
-        id: params.id,
+        id: id,
         userId: session.user.id,
       },
-      data,
+      data: {
+        title,
+        description,
+        status,
+        priority,
+        dueDate: dueDate ? new Date(dueDate) : undefined,
+      },
     })
 
     return NextResponse.json(task)
@@ -41,11 +75,14 @@ export async function PATCH(
   }
 }
 
+// ✅ DELETE Task
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+
     const session = await auth.api.getSession({
       headers: request.headers
     })
@@ -56,7 +93,7 @@ export async function DELETE(
 
     await prisma.task.delete({
       where: {
-        id: params.id,
+        id: id,
         userId: session.user.id,
       },
     })
