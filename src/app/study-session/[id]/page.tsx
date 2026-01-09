@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Play, Pause, Square, ArrowLeft } from "lucide-react"
+import { authClient } from "@/lib/auth-client"
 
 export default function StudySessionPage() {
   const params = useParams()
@@ -11,13 +12,30 @@ export default function StudySessionPage() {
 
   const [event, setEvent] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [authLoading, setAuthLoading] = useState(true)
   const [seconds, setSeconds] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
   const [startTime, setStartTime] = useState<Date | null>(null)
 
   useEffect(() => {
-    fetchEvent()
-  }, [eventId])
+    // Check authentication first
+    const checkAuth = async () => {
+      try {
+        const sessionData = await authClient.getSession()
+        if (!sessionData?.data?.user) {
+          router.push('/')
+          return
+        }
+        setAuthLoading(false)
+        fetchEvent()
+      } catch (error) {
+        console.error("Error checking authentication:", error)
+        router.push('/')
+      }
+    }
+    
+    checkAuth()
+  }, [eventId, router])
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null
@@ -76,7 +94,7 @@ export default function StudySessionPage() {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-foreground">Loading...</div>

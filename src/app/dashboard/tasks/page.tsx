@@ -309,7 +309,7 @@ export default function TasksPage() {
 
   const TaskCard = ({ task }: { task: Task }) => (
     <div 
-      className={`bg-card p-4 rounded-xl shadow-sm border border-border mb-3 transition-all duration-300 ease-in-out select-none cursor-grab active:cursor-grabbing ${
+      className={`bg-card p-4 rounded-xl shadow-sm border border-border mb-3 transition-all duration-300 ease-in-out select-none cursor-grab active:cursor-grabbing overflow-hidden ${
         draggedTask?.id === task.id ? 'scale-[1.02] shadow-xl' : 'hover:shadow-md'
       }`}
       draggable
@@ -337,14 +337,14 @@ export default function TasksPage() {
             {getStatusIcon(task.status)}
           </div>
           <div className="flex-1">
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-medium text-foreground">{task.title}</h3>
-              <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(task.priority)}`}>
+              <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPriorityColor(task.priority)} flex-shrink-0`}>
                 {task.priority}
               </span>
               {task.subject && (
                 <span 
-                  className="px-2 py-1 text-xs font-medium rounded-full text-white"
+                  className="px-2 py-1 text-xs font-medium rounded-full text-white flex-shrink-0"
                   style={{ backgroundColor: task.subject.color }}
                 >
                   {task.subject.name}
@@ -361,7 +361,7 @@ export default function TasksPage() {
             )}
           </div>
         </div>
-        <div className="relative">
+        <div className="relative z-20">
           <button
             onClick={(e) => {
               e.stopPropagation()
@@ -373,7 +373,18 @@ export default function TasksPage() {
           </button>
           
           {openDropdown === task.id && (
-            <div className="absolute right-0 mt-1 w-32 rounded-lg z-10 bg-background/75 supports-[backdrop-filter]:bg-background/60 backdrop-blur-xl backdrop-saturate-150 border border-border/60 shadow-sm">
+            <div 
+              ref={(el) => {
+                if (el && openDropdown === task.id) {
+                  const buttonRect = el.previousElementSibling?.getBoundingClientRect()
+                  if (buttonRect) {
+                    el.style.top = `${buttonRect.bottom + window.scrollY + 4}px`
+                    el.style.right = `${window.innerWidth - buttonRect.right - 8}px`
+                  }
+                }
+              }}
+              className="fixed z-50 w-40 rounded-lg bg-background border border-border shadow-lg"
+            >
               <button
                 onClick={() => handleStatusChange(task.id, "TODO")}
                 className="w-full text-left px-3 py-2 text-sm hover:bg-primary/20 transition-colors flex items-center space-x-2"

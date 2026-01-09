@@ -14,7 +14,9 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const subjectId = searchParams.get('subjectId')
-    const range = searchParams.get('range') as 'week' | 'month' | 'all' || 'month'
+    const range = searchParams.get('range') as '24h' | 'week' | 'month' | 'custom' | 'all' || 'month'
+    const customStartDate = searchParams.get('startDate')
+    const customEndDate = searchParams.get('endDate')
 
     if (!subjectId) {
       return NextResponse.json({ error: "Subject ID is required" }, { status: 400 })
@@ -23,13 +25,29 @@ export async function GET(request: NextRequest) {
     // Calculate date range
     const now = new Date()
     let startDate: Date
+    let endDate: Date | null = null
     
     switch (range) {
+      case '24h':
+        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+        break
       case 'week':
         startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
         break
       case 'month':
         startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+        break
+      case 'custom':
+        if (customStartDate && customEndDate) {
+          startDate = new Date(customStartDate)
+          // For custom range, set end date to end of day to be inclusive
+          endDate = new Date(customEndDate)
+          endDate.setHours(23, 59, 59, 999)
+          console.log('Custom session range API:', { startDate, endDate, customStartDate, customEndDate })
+        } else {
+          // Fallback to month if custom dates are not provided
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+        }
         break
       case 'all':
       default:
@@ -43,7 +61,10 @@ export async function GET(request: NextRequest) {
       where: {
         userId: session.user.id,
         subjectId: subjectId,
-        startTime: { gte: startDate }
+        startTime: { 
+          gte: startDate,
+          ...(endDate ? { lte: endDate } : {})
+        }
       },
       select: {
         id: true,
@@ -62,7 +83,10 @@ export async function GET(request: NextRequest) {
       where: {
         userId: session.user.id,
         eventId: { in: eventIds },
-        startTime: { gte: startDate }
+        startTime: { 
+          gte: startDate,
+          ...(endDate ? { lte: endDate } : {})
+        }
       },
       orderBy: {
         startTime: 'desc'
@@ -70,13 +94,16 @@ export async function GET(request: NextRequest) {
     })
 
     // For each session, fetch completed tasks during that session time period
-    // First fetch all completed tasks for this subject in the time range
+    // First fetch all completed tasks for this subject in time range
     const allCompletedTasks = await prisma.task.findMany({
       where: {
         userId: session.user.id,
         subjectId: subjectId,
         status: 'DONE',
-        updatedAt: { gte: startDate }
+        updatedAt: { 
+          gte: startDate,
+          ...(endDate ? { lte: endDate } : {})
+        }
       },
       select: {
         id: true,

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { Clock, CheckCircle, XCircle, TrendingUp, BookOpen, Target, Trash2 } from 'lucide-react'
+import { Clock, CheckCircle, XCircle, TrendingUp, BookOpen, Target, Trash2, Calendar } from 'lucide-react'
 import { useSettings } from "@/contexts/settings-context"
 
 interface SubjectStats {
@@ -54,7 +54,10 @@ interface SessionData {
 export default function AnalyticsPage() {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'all'>('month')
+  const [timeRange, setTimeRange] = useState<'24h' | 'week' | 'month' | 'custom' | 'all'>('month')
+  const [customStartDate, setCustomStartDate] = useState('')
+  const [customEndDate, setCustomEndDate] = useState('')
+  const [showCustomDatePicker, setShowCustomDatePicker] = useState(false)
   const [expandedSubject, setExpandedSubject] = useState<string | null>(null)
   const [sessionData, setSessionData] = useState<SessionData | null>(null)
   const [loadingSessions, setLoadingSessions] = useState(false)
@@ -63,18 +66,76 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
     fetchAnalytics()
+  }, [timeRange, customStartDate, customEndDate])
+
+  useEffect(() => {
+    if (timeRange === 'custom') {
+      setShowCustomDatePicker(true)
+    } else {
+      setShowCustomDatePicker(false)
+      setCustomStartDate('')
+      setCustomEndDate('')
+    }
   }, [timeRange])
+
+  // Auto-refresh session data when time range changes and a subject is expanded
+  useEffect(() => {
+    if (expandedSubject) {
+      fetchSessionData(expandedSubject)
+    }
+  }, [timeRange, customStartDate, customEndDate])
 
   const fetchAnalytics = async () => {
     try {
-      const response = await fetch(`/api/analytics?range=${timeRange}`, {
-        credentials: 'include'
+      const timestamp = Date.now() // Add cache-busting
+      let url = `/api/analytics?range=${timeRange}&t=${timestamp}`
+      
+      if (timeRange === 'custom' && customStartDate && customEndDate) {
+        // Ensure dates are in YYYY-MM-DD format and add time to make them inclusive
+        const startDate = new Date(customStartDate)
+        const endDate = new Date(customEndDate)
+        
+        // Set end date to end of day to be inclusive
+        endDate.setHours(23, 59, 59, 999)
+        
+        const formattedStartDate = startDate.toISOString().split('T')[0]
+        const formattedEndDate = endDate.toISOString().split('T')[0]
+        
+        url += `&startDate=${formattedStartDate}&endDate=${formattedEndDate}`
+        
+        console.log('Custom date range:', {
+          customStartDate,
+          customEndDate,
+          formattedStartDate,
+          formattedEndDate,
+          url
+        })
+      }
+      
+      console.log('Fetching analytics from URL:', url)
+      
+      // Force clear loading state
+      setLoading(true)
+      
+      const response = await fetch(url, {
+        credentials: 'include',
+        cache: 'no-store' // Prevent caching
       })
+      console.log('Analytics response status:', response.status)
+      
       if (response.ok) {
         const data = await response.json()
-        setAnalyticsData(data)
+        console.log('Analytics data received:', data)
+        
+        // Force update the state
+        setAnalyticsData(null) // Clear first
+        setTimeout(() => {
+          setAnalyticsData(data) // Then set new data
+        }, 0)
       } else {
         console.error("Failed to fetch analytics:", response.status)
+        const errorText = await response.text()
+        console.error("Error response:", errorText)
       }
     } catch (error) {
       console.error("Failed to fetch analytics:", error)
@@ -94,7 +155,31 @@ export default function AnalyticsPage() {
     setExpandedSubject(subjectId)
     
     try {
-      const response = await fetch(`/api/analytics/sessions?subjectId=${subjectId}&range=${timeRange}`, {
+      let url = `/api/analytics/sessions?subjectId=${subjectId}&range=${timeRange}`
+      
+      if (timeRange === 'custom' && customStartDate && customEndDate) {
+        // Ensure dates are in YYYY-MM-DD format and add time to make them inclusive
+        const startDate = new Date(customStartDate)
+        const endDate = new Date(customEndDate)
+        
+        // Set end date to end of day to be inclusive
+        endDate.setHours(23, 59, 59, 999)
+        
+        const formattedStartDate = startDate.toISOString().split('T')[0]
+        const formattedEndDate = endDate.toISOString().split('T')[0]
+        
+        url += `&startDate=${formattedStartDate}&endDate=${formattedEndDate}`
+        
+        console.log('Custom session date range:', {
+          customStartDate,
+          customEndDate,
+          formattedStartDate,
+          formattedEndDate,
+          url
+        })
+      }
+      
+      const response = await fetch(url, {
         credentials: 'include'
       })
       if (response.ok) {
@@ -211,7 +296,7 @@ export default function AnalyticsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="w-full px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Analytics Dashboard</h1>
@@ -221,6 +306,16 @@ export default function AnalyticsPage() {
         {/* Time Range Selector */}
         <div className="mb-8">
           <div className="inline-flex rounded-lg border border-border bg-card p-1">
+            <button
+              onClick={() => setTimeRange('24h')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                timeRange === '24h' 
+                  ? 'bg-primary text-white' 
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Last 24h
+            </button>
             <button
               onClick={() => setTimeRange('week')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -242,6 +337,16 @@ export default function AnalyticsPage() {
               Last Month
             </button>
             <button
+              onClick={() => setTimeRange('custom')}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                timeRange === 'custom' 
+                  ? 'bg-primary text-white' 
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Custom
+            </button>
+            <button
               onClick={() => setTimeRange('all')}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 timeRange === 'all' 
@@ -252,6 +357,45 @@ export default function AnalyticsPage() {
               All Time
             </button>
           </div>
+
+          {/* Custom Date Range Picker */}
+          {showCustomDatePicker && (
+            <div className="mt-4 p-4 bg-card/90 backdrop-blur-sm rounded-lg border border-border">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <label className="text-sm font-medium text-foreground">From:</label>
+                  <input
+                    type="date"
+                    value={customStartDate}
+                    onChange={(e) => setCustomStartDate(e.target.value)}
+                    className="px-3 py-1 text-sm border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <label className="text-sm font-medium text-foreground">To:</label>
+                  <input
+                    type="date"
+                    value={customEndDate}
+                    onChange={(e) => setCustomEndDate(e.target.value)}
+                    className="px-3 py-1 text-sm border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    if (customStartDate && customEndDate) {
+                      fetchAnalytics()
+                    }
+                  }}
+                  disabled={!customStartDate || !customEndDate}
+                  className="px-4 py-1 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Overview Cards */}

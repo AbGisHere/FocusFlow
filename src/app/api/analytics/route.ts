@@ -13,18 +13,38 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const range = searchParams.get('range') as 'week' | 'month' | 'all' || 'month'
+    const range = searchParams.get('range') as '24h' | 'week' | 'month' | 'custom' | 'all' || 'month'
+    const customStartDate = searchParams.get('startDate')
+    const customEndDate = searchParams.get('endDate')
+
+    console.log('Analytics API received params:', { range, customStartDate, customEndDate })
 
     // Calculate date range
     const now = new Date()
     let startDate: Date
+    let endDate: Date | null = null
     
     switch (range) {
+      case '24h':
+        startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+        break
       case 'week':
         startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
         break
       case 'month':
         startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+        break
+      case 'custom':
+        if (customStartDate && customEndDate) {
+          startDate = new Date(customStartDate)
+          // For custom range, set end date to end of day to be inclusive
+          endDate = new Date(customEndDate)
+          endDate.setHours(23, 59, 59, 999)
+          console.log('Custom range API:', { startDate, endDate, customStartDate, customEndDate })
+        } else {
+          // Fallback to month if custom dates are not provided
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+        }
         break
       case 'all':
       default:
@@ -37,7 +57,10 @@ export async function GET(request: NextRequest) {
       by: ['subjectId'],
       where: {
         userId: session.user.id,
-        startTime: { gte: startDate },
+        startTime: { 
+          gte: startDate,
+          ...(endDate ? { lte: endDate } : {})
+        },
         subjectId: { not: null }
       },
       _count: {
@@ -51,14 +74,20 @@ export async function GET(request: NextRequest) {
         userId: session.user.id,
         events: {
           some: {
-            startTime: { gte: startDate }
+            startTime: { 
+              gte: startDate,
+              ...(endDate ? { lte: endDate } : {})
+            }
           }
         }
       },
       include: {
         events: {
           where: {
-            startTime: { gte: startDate }
+            startTime: { 
+              gte: startDate,
+              ...(endDate ? { lte: endDate } : {})
+            }
           },
           include: {
             studySessions: true
@@ -94,7 +123,10 @@ export async function GET(request: NextRequest) {
     const tasks = await prisma.task.findMany({
       where: {
         userId: session.user.id,
-        createdAt: { gte: startDate }
+        createdAt: { 
+          gte: startDate,
+          ...(endDate ? { lte: endDate } : {})
+        }
       }
     })
 
@@ -168,6 +200,12 @@ export async function GET(request: NextRequest) {
         hours: monthHours
       })
     }
+
+    console.log('Analytics API results:', {
+      subjectStatsCount: subjectStatsWithDetails.length,
+      totalHours: subjectStatsWithDetails.reduce((sum, subject) => sum + subject.totalHours, 0),
+      taskStats
+    })
 
     return NextResponse.json({
       subjectStats: subjectStatsWithDetails,

@@ -1,6 +1,6 @@
 # FocusFlow
 
-![Version](https://img.shields.io/badge/version-0.10.0-green.svg)
+![Version](https://img.shields.io/badge/version-0.11.0-green.svg)
 ![Status](https://img.shields.io/badge/status-under%20development-yellow.svg)
 
 > A modern productivity dashboard to manage tasks and calendar events in one place.
@@ -44,6 +44,59 @@ Currently, users have to **track todos in one app and events in another (or rely
 - [x] **Reminders & Notifications:** Optional reminders for due tasks and upcoming events
 
 A modern productivity dashboard built with Next.js 15, TypeScript, and Better Auth.
+
+## 🚀 What's New in v0.11.0
+
+### 🎯 Major Features
+- **🎵 Background Music System**: Complete ambient sound integration with Supabase storage
+  - **5 Audio Tracks**: Rain, Ocean Waves, Forest, Fireplace, and White Noise
+  - **Supabase Storage Integration**: Fast, reliable CDN delivery for audio files
+  - **Persistent Playback**: Music continues playing across page navigation and timer state changes
+  - **Volume Control**: Adjustable volume with visual feedback and mute functionality
+  - **Smart Loading**: Loading states and error handling for seamless user experience
+  - **Visual Sound Selector**: Beautiful emoji icons and smooth transitions between tracks
+  - **Auto-Resume**: Music automatically resumes when returning to the app
+  - **Lightweight Repository**: No large audio files in git - uses cloud storage
+- **📱 Fully Responsive Layout System**: Complete mobile-to-desktop optimization
+  - **Dynamic Container Sizing**: All pages automatically adapt to screen width
+  - **No Horizontal Overflow**: Content fits perfectly within viewport boundaries
+  - **Responsive Grid Systems**: Smart column adjustments based on screen size
+  - **Mobile-First Design**: Optimized for phones, tablets, and desktops
+  - **Fluid Width Containers**: Uses full available space instead of fixed constraints
+  - **Height Constraints**: Calendar and tasks containers prevent vertical overflow
+  - **Scrollable Content**: Proper scrolling for long content within containers
+- **🖥️ Enhanced Timer Page Layout**: Improved full-screen timer experience
+  - **Smart Layout Switching**: Timer takes full screen when calendar/tasks disabled
+  - **2-Column Design**: Timer on left, calendar/tasks on right when enabled
+  - **No Overlap Issues**: Proper spacing and container constraints
+  - **Responsive Behavior**: Adapts from mobile (stacked) to desktop (side-by-side)
+  - **Full Width Utilization**: Maximizes use of available screen real estate
+- **⏱️ Improved Mini Timer**: Enhanced draggable timer with better positioning
+  - **Viewport Boundary Constraints**: Timer stays within visible screen area
+  - **Smart Corner Snapping**: Intuitive positioning with 20px margins
+  - **Responsive Hiding**: Timer hidden on full-screen timer page to prevent overlap
+  - **Smooth Dragging**: Improved cursor feedback and visual states
+  - **Persistent Positioning**: Timer position saved and restored across sessions
+  - **Auto-Reposition on Resize**: Timer adjusts position when screen size changes
+- **📋 Enhanced Task Cards**: Improved task management interface
+  - **Tag Wrapping**: Priority and subject tags wrap to next line when needed
+  - **Overflow Prevention**: Task cards prevent content from spilling outside boundaries
+  - **Fixed Dropdown Positioning**: Dropdowns appear exactly where clicked, not constrained by containers
+  - **Better Visual Hierarchy**: Clear separation between title, tags, and actions
+  - **Responsive Design**: Cards adapt to different screen sizes and content lengths
+- **🎨 UI/UX Polish**: Comprehensive design improvements
+  - **Consistent Spacing**: Unified padding and margins throughout app
+  - **Better Visual Hierarchy**: Clear content organization and flow
+  - **Smooth Transitions**: Enhanced animations and state changes
+  - **Error Boundaries**: Better error handling and user feedback
+  - **Loading States**: Consistent loading indicators across all features
+
+### 🔧 Technical Improvements
+- **Supabase Integration**: Moved from GitHub Releases to dedicated Supabase storage
+- **Performance Optimization**: Reduced bundle size and improved loading times
+- **Code Organization**: Better component structure and state management
+- **Type Safety**: Enhanced TypeScript types and error handling
+- **Accessibility**: Improved ARIA labels and keyboard navigation
 
 ## 🚀 What's New in v0.10.0
 

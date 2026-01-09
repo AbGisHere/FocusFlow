@@ -23,7 +23,30 @@ export function MinimizedTimer() {
   const timerRef = useRef<HTMLDivElement>(null)
   const isInitialized = useRef(false)
 
-  // Load position from localStorage on mount
+  // Track screen size for responsive behavior
+  useEffect(() => {
+    const handleResize = () => {
+      const screenWidth = window.innerWidth
+      const screenHeight = window.innerHeight
+      
+      // Reposition timer to stay within bounds on resize
+      setPosition(prev => {
+        const timerWidth = 280
+        const timerHeight = 120
+        const margin = 20
+        
+        // Ensure timer stays within new screen bounds
+        const newX = Math.max(margin, Math.min(prev.x, screenWidth - timerWidth - margin))
+        const newY = Math.max(margin, Math.min(prev.y, screenHeight - timerHeight - margin))
+        
+        return { x: newX, y: newY }
+      })
+    }
+    
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
   useEffect(() => {
     if (!isInitialized.current) {
       try {
@@ -60,7 +83,7 @@ export function MinimizedTimer() {
     const screenHeight = window.innerHeight
     const timerWidth = 280 // min-w-[280px] + padding
     const timerHeight = 120 // approximate height
-    const margin = 16 // distance from edges
+    const margin = 20 // distance from edges
     const snapThreshold = 50 // Distance from corner to trigger snap
     
     // Determine if timer is near any corner
@@ -76,16 +99,16 @@ export function MinimizedTimer() {
     if (nearLeftCorner || nearRightCorner || nearTopCorner || nearBottomCorner) {
       // Snap horizontally
       if (nearLeftCorner) {
-        snappedX = margin // Left side
+        snappedX = margin // Left side with margin
       } else if (nearRightCorner) {
-        snappedX = screenWidth - timerWidth - margin // Right side
+        snappedX = screenWidth - timerWidth - margin // Right side with margin
       }
       
       // Snap vertically
       if (nearTopCorner) {
-        snappedY = margin // Top
+        snappedY = margin // Top with margin
       } else if (nearBottomCorner) {
-        snappedY = screenHeight - timerHeight - margin // Bottom
+        snappedY = screenHeight - timerHeight - margin // Bottom with margin
       }
     }
     
@@ -119,11 +142,12 @@ export function MinimizedTimer() {
       const newX = e.clientX - dragStart.x
       const newY = e.clientY - dragStart.y
       
-      // Keep timer within viewport bounds
+      // Keep timer within viewport bounds with proper margins
       const maxX = window.innerWidth - 280 // timer width
       const maxY = window.innerHeight - 120 // timer height
-      const constrainedX = Math.max(0, Math.min(newX, maxX))
-      const constrainedY = Math.max(0, Math.min(newY, maxY))
+      const margin = 20 // Distance from edges
+      const constrainedX = Math.max(margin, Math.min(newX, maxX - margin))
+      const constrainedY = Math.max(margin, Math.min(newY, maxY - margin))
       
       setPosition({ x: constrainedX, y: constrainedY })
     }

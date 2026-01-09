@@ -7,6 +7,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSam
 import Link from "next/link"
 import { useTimer } from "@/contexts/timer-context"
 import { useSettings } from "@/contexts/settings-context"
+import { authClient } from "@/lib/auth-client"
 
 interface Event {
   id: string
@@ -58,12 +59,29 @@ export default function TimerPage() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [calendarEvents, setCalendarEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
+  const [authLoading, setAuthLoading] = useState(true)
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
 
   useEffect(() => {
-    fetchEvent()
-  }, [eventId])
+    // Check authentication first
+    const checkAuth = async () => {
+      try {
+        const sessionData = await authClient.getSession()
+        if (!sessionData?.data?.user) {
+          router.push('/')
+          return
+        }
+        setAuthLoading(false)
+        fetchEvent()
+      } catch (error) {
+        console.error("Error checking authentication:", error)
+        router.push('/')
+      }
+    }
+    
+    checkAuth()
+  }, [eventId, router])
 
   useEffect(() => {
     if (event?.subject?.id) {
@@ -318,7 +336,7 @@ export default function TimerPage() {
     }
   }
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -361,21 +379,21 @@ export default function TimerPage() {
       </div>
 
       {/* Main Timer Content */}
-      <div className="max-w-6xl mx-auto px-4 py-12">
+      <div className="w-full px-4 py-12">
         <div className={`grid gap-8 ${
           settings.showCalendar && settings.showTasks 
-            ? 'grid-cols-1 lg:grid-cols-2' 
+            ? 'grid-cols-1 lg:grid-cols-2' // Both shown: Timer (left) + Calendar+Tasks (right)
             : settings.showCalendar || settings.showTasks
-            ? 'grid-cols-1 lg:grid-cols-2' 
-            : 'grid-cols-1'
+            ? 'grid-cols-1 lg:grid-cols-2' // One shown: Timer (left) + Calendar or Tasks (right)
+            : 'grid-cols-1' // Only Timer: full screen
         }`}>
-          {/* Timer Section - always visible */}
+          {/* Timer Section - responsive width */}
           <div className={`${
             settings.showCalendar && settings.showTasks 
-              ? 'lg:col-span-1' 
-              : settings.showCalendar || settings.showTasks 
-                ? 'lg:col-span-1' 
-                : ''
+              ? 'col-span-1 w-full' // Takes left column when both are shown
+              : settings.showCalendar || settings.showTasks
+              ? 'col-span-1 w-full' // Takes left column when one is shown
+              : 'col-span-1 w-full max-w-2xl mx-auto' // Takes full width when only timer
           } flex flex-col justify-center items-center`}>
             {/* Event Title */}
             <h1 className="text-3xl font-bold text-foreground mb-2">{event.title}</h1>
@@ -430,16 +448,16 @@ export default function TimerPage() {
             </div>
           </div>
 
-          {/* Right Column - Tasks and Calendar stacked */}
+          {/* Right Column - Calendar and Tasks stacked vertically, fully responsive */}
           {(settings.showTasks || settings.showCalendar) && (
             <div className={`${
               settings.showCalendar && settings.showTasks 
-                ? 'lg:col-span-1' 
-                : 'lg:col-span-1'
-            } space-y-8`}>
-              {/* Tasks Section - conditional */}
+                ? 'col-span-1 space-y-8 overflow-hidden w-full' // Takes full right column when both are shown
+                : 'col-span-1 space-y-8 overflow-hidden w-full' // Takes full right column when one is shown
+            }`}>
+              {/* Tasks Section - conditional, fully responsive */}
               {settings.showTasks && (
-                <div className="bg-card/90 backdrop-blur-sm rounded-lg border border-border p-6">
+                <div className="bg-card/90 backdrop-blur-sm rounded-lg border border-border p-6 w-full max-w-full max-h-[40vh] overflow-hidden">
                   <h2 className="text-lg font-semibold text-foreground mb-4">Related Tasks</h2>
                   
                   {tasks.length === 0 ? (
@@ -515,9 +533,9 @@ export default function TimerPage() {
                 </div>
               )}
 
-              {/* Calendar Section - conditional, placed below tasks */}
+              {/* Calendar Section - conditional, fully responsive */}
               {settings.showCalendar && (
-                <div className="bg-card/90 backdrop-blur-sm rounded-lg border border-border p-4">
+                <div className="bg-card/90 backdrop-blur-sm rounded-lg border border-border p-4 w-full max-w-full max-h-[50vh] overflow-hidden">
                   <h2 className="text-lg font-semibold text-foreground mb-4">Calendar</h2>
                   
                   {/* Calendar Header */}
@@ -539,16 +557,18 @@ export default function TimerPage() {
                     </button>
                   </div>
 
-                  {/* Calendar Grid */}
-                  <div className="grid grid-cols-7 gap-0.5 mb-1">
-                    {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
-                      <div key={index} className="text-center text-xs font-medium text-muted-foreground py-1">
-                        {day}
-                      </div>
-                    ))}
-                  </div>
+                  {/* Calendar Content - Scrollable */}
+                  <div className="max-h-[30vh] overflow-y-auto">
+                    {/* Calendar Grid */}
+                    <div className="grid grid-cols-7 gap-0.5 mb-1">
+                      {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
+                        <div key={index} className="text-center text-xs font-medium text-muted-foreground py-1">
+                          {day}
+                        </div>
+                      ))}
+                    </div>
 
-                  <div className="grid grid-cols-7 gap-0.5">
+                    <div className="grid grid-cols-7 gap-0.5">
                     {monthDays.map((day: Date, index: number) => {
                       const dayEvents = getEventsForDay(day)
                       const dayTasks = getTasksForDay(day)
@@ -601,6 +621,7 @@ export default function TimerPage() {
                         </div>
                       )
                     })}
+                    </div>
                   </div>
 
                   {/* Events Summary */}
