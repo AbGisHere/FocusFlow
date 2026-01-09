@@ -3,7 +3,9 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/contexts/theme-context"
 import { TimerProvider } from "@/contexts/timer-context"
 import { SettingsProvider } from "@/contexts/settings-context"
+import { MusicProvider } from "@/contexts/music-context"
 import { MinimizedTimer } from "@/components/minimized-timer"
+import { AuthenticatedBackgroundMusic } from "@/components/authenticated-background-music"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -23,10 +25,12 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider defaultTheme="system">
           <SettingsProvider>
-            <TimerProvider>
-              {children}
-              <MinimizedTimer />
-            </TimerProvider>
+            <MusicProvider>
+              <TimerProvider>
+                {children}
+                <MinimizedTimer />
+              </TimerProvider>
+            </MusicProvider>
           </SettingsProvider>
         </ThemeProvider>
       </body>

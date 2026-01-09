@@ -7,7 +7,7 @@ import { authClient } from "@/lib/auth-client"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ProfileDropdown } from "@/components/profile-dropdown"
 import { FrostedHeader } from "@/components/frosted-header"
-import { BackgroundMusicPlayer } from "@/components/background-music-player"
+import { AuthenticatedBackgroundMusic } from "@/components/authenticated-background-music"
 import { useEffect, useState } from "react"
 
 export default function DashboardLayout({
@@ -104,7 +104,7 @@ export default function DashboardLayout({
               </div>
 
               <div className="flex items-center space-x-4">
-                <BackgroundMusicPlayer />
+                <AuthenticatedBackgroundMusic />
                 <ThemeToggle />
                 
                 {session?.data?.user && (

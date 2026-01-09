@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Play, Pause, Square, ArrowLeft } from "lucide-react"
 import { authClient } from "@/lib/auth-client"
+import { AuthenticatedBackgroundMusic } from "@/components/authenticated-background-music"
 
 export default function StudySessionPage() {
   const params = useParams()
@@ -131,7 +132,9 @@ export default function StudySessionPage() {
             <span>Back to Calendar</span>
           </button>
           <h1 className="text-xl font-semibold text-foreground">Study Session</h1>
-          <div className="w-24"></div>
+          <div className="flex items-center space-x-2">
+            <AuthenticatedBackgroundMusic />
+          </div>
         </div>
       </div>
 

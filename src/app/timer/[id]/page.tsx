@@ -8,6 +8,7 @@ import Link from "next/link"
 import { useTimer } from "@/contexts/timer-context"
 import { useSettings } from "@/contexts/settings-context"
 import { authClient } from "@/lib/auth-client"
+import { AuthenticatedBackgroundMusic } from "@/components/authenticated-background-music"
 
 interface Event {
   id: string
@@ -359,7 +360,7 @@ export default function TimerPage() {
       {/* Header */}
       <div className="bg-card/90 backdrop-blur-sm border-b border-border">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-end">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               {event.subject && (
                 <div className="flex items-center space-x-2">
@@ -373,6 +374,9 @@ export default function TimerPage() {
               {event.isRecurring && (
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               )}
+            </div>
+            <div className="flex items-center space-x-2">
+              <AuthenticatedBackgroundMusic />
             </div>
           </div>
         </div>
